@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, LogIn, Github, MoreVertical, Zap } from 'lucide-react';
+import { Loader2, LogIn, Github, MoreVertical, Zap, Battery } from 'lucide-react';
 import { loginUser, type LoginResult } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   email: z.string().email('Invalid email address. The @ symbol is mandatory.').min(1, 'Email is required'),
   rememberMe: z.boolean().default(false),
+  autoOpener: z.boolean().default(false),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -56,14 +57,17 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [defaultValues, setDefaultValues] = useState({ username: '', email: '', rememberMe: false });
+  const [defaultValues, setDefaultValues] = useState({ username: '', email: '', rememberMe: false, autoOpener: false });
 
   useEffect(() => {
     const savedUsername = localStorage.getItem('username');
     const savedEmail = localStorage.getItem('api');
     const rememberMe = localStorage.getItem('rememberMe') === 'true';
+    const autoOpener = localStorage.getItem('autoOpener') === 'true';
+
+    // Pre-fill if credentials exist, regardless of rememberMe state
     if (savedUsername && savedEmail) {
-      setDefaultValues({ username: savedUsername, email: savedEmail, rememberMe: rememberMe });
+      setDefaultValues({ username: savedUsername, email: savedEmail, rememberMe: rememberMe, autoOpener: autoOpener });
     }
   }, []);
 
@@ -85,18 +89,17 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
       
       if (result.success && result.status === 'approved') {
           localStorage.setItem("successKey", "true");
-          if(data.rememberMe){
-            localStorage.setItem("username", data.username);
-            localStorage.setItem("api", data.email);
-            localStorage.setItem("rememberMe", "true");
-          } else {
-             localStorage.removeItem("username");
-             localStorage.removeItem("api");
-             localStorage.removeItem("rememberMe");
-          }
+          // Always save username and email
+          localStorage.setItem("username", data.username);
+          localStorage.setItem("api", data.email);
+          // Save toggle states
+          localStorage.setItem("rememberMe", data.rememberMe ? "true" : "false");
+          localStorage.setItem("autoOpener", data.autoOpener ? "true" : "false");
+
       } else {
-         // if login fails for any reason other than success, disable remember me
-         localStorage.removeItem("rememberMe");
+         // if login fails for any reason other than success, disable toggles
+         localStorage.setItem("rememberMe", "false");
+         localStorage.setItem("autoOpener", "false");
          if (result.status !== 'banned') {
             toast({
               variant: 'destructive',
@@ -169,24 +172,45 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="rememberMe"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
-                    <FormLabel className="flex items-center gap-2 text-white/80">
-                        <Zap className="h-4 w-4 text-primary" />
-                        Auto Login
-                    </FormLabel>
-                    <FormControl>
-                        <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        />
-                    </FormControl>
-                </FormItem>
-              )}
-            />
+            <div className="space-y-3">
+              <FormField
+                control={form.control}
+                name="rememberMe"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
+                      <FormLabel className="flex items-center gap-2 text-white/80 cursor-pointer">
+                          <Zap className="h-4 w-4 text-primary" />
+                          Auto Login
+                      </FormLabel>
+                      <FormControl>
+                          <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          />
+                      </FormControl>
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="autoOpener"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
+                      <FormLabel className="flex items-center gap-2 text-white/80 cursor-pointer">
+                          <Battery className="h-4 w-4 text-primary" />
+                          Auto Opener
+                      </FormLabel>
+                      <FormControl>
+                          <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={!form.watch('rememberMe')}
+                          />
+                      </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => toast({ title: 'Please Create A GitHub Account' })}>
                 <Github className="mr-2 h-4 w-4" />

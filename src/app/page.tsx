@@ -117,10 +117,9 @@ export default function Home() {
   };
   
   const handleExitQuickLogin = () => {
-    localStorage.removeItem('rememberMe');
-    localStorage.removeItem('username');
-    localStorage.removeItem('api');
-    localStorage.removeItem('autoOpener');
+    // only disable auto login toggles, keep credentials
+    localStorage.setItem('rememberMe', 'false');
+    localStorage.setItem('autoOpener', 'false');
     setQuickLoginUser(null);
     setAppState('auth');
   }
