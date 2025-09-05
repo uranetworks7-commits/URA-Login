@@ -43,7 +43,7 @@ export interface LoginResult {
 
 export async function createAccountRequest(data: UserData): Promise<{ success: boolean; message: string }> {
     const { username, email } = data;
-    const userRef = ref(db, `users/${username}`);
+    const userRef = ref(db, `users/${username.toLowerCase()}`);
     const snapshot = await get(userRef);
 
     if (snapshot.exists()) {
@@ -87,7 +87,7 @@ async function runSecurityCheck(user: UserData, activity: string): Promise<Login
                 bannedAt: new Date().toISOString(),
                 unbanAt: unbanAt ? new Date(unbanAt).toISOString() : 'Permanent',
             };
-            await update(ref(db, `users/${user.username}`), banInfo);
+            await update(ref(db, `users/${user.username.toLowerCase()}`), banInfo);
             
             return {
                 success: false,
@@ -106,7 +106,7 @@ async function runSecurityCheck(user: UserData, activity: string): Promise<Login
 
 export async function loginUser(credentials: UserData, activity: string): Promise<LoginResult> {
     const { username, email } = credentials;
-    const userRef = ref(db, `users/${username}`);
+    const userRef = ref(db, `users/${username.toLowerCase()}`);
     const snapshot = await get(userRef);
 
     if (!snapshot.exists()) {
@@ -120,7 +120,7 @@ export async function loginUser(credentials: UserData, activity: string): Promis
     
     switch (userData.status) {
         case 1:
-            return { success: false, message: 'Your account is pending approval.', status: 'pending' };
+            return { success: false, message: 'This account is pending for approval.', status: 'pending' };
         case 2:
             const securityResult = await runSecurityCheck(credentials, activity);
             if (!securityResult.success) {

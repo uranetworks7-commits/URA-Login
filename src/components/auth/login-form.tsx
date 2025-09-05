@@ -14,8 +14,8 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 
 const loginSchema = z.object({
-  username: z.string().min(1, 'Username is required').transform(v => v.toLowerCase()),
-  email: z.string().email('Invalid email address').min(1, 'Email is required').transform(v => v.toLowerCase()),
+  username: z.string().min(1, 'Username is required'),
+  email: z.string().email('Invalid email address. The @ symbol is mandatory.').min(1, 'Email is required'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -106,7 +106,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader>
             <CardTitle className="text-2xl text-primary">Login</CardTitle>
-            <CardDescription>System 2.0: Username and Email must be in small letters.</CardDescription>
+            <CardDescription>Suggestion: Use lowercase for username and email for best results.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <FormField

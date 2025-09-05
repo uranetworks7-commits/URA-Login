@@ -26,7 +26,7 @@ export function TermsDialog() {
           <AlertDialogDescription asChild>
             <div className="space-y-4 pt-4 text-left text-foreground">
               <p>
-                <strong>1.</strong> Username and Email ID must be in small letters. We don&apos;t accept any capital letters.
+                <strong>1.</strong> Suggestion: Use lowercase for username and email for best results.
               </p>
               <p>
                 <strong>2.</strong> Once you submit your request, your account will be reviewed by an administrator. This may take 24-48 hours. Please be patient.

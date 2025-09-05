@@ -16,8 +16,8 @@ import { useToast } from '@/hooks/use-toast';
 import { TermsDialog } from './terms-dialog';
 
 const signupSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters').max(20).regex(/^[a-z0-9_]+$/, 'Username can only contain lowercase letters, numbers, and underscores.').transform(v => v.toLowerCase()),
-  email: z.string().email('Invalid email address').transform(v => v.toLowerCase()),
+  username: z.string().min(3, 'Username must be at least 3 characters').max(20).regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores.'),
+  email: z.string().email('Invalid email address. The @ symbol is mandatory.'),
   captcha: z.string().min(1, 'Captcha is required'),
   terms: z.boolean().refine(val => val === true, { message: 'You must accept the terms and conditions.' }),
 });
