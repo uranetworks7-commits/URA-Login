@@ -239,26 +239,6 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                         </FormItem>
                       )}
                     />
-                    <div className="relative flex items-center justify-center pt-2">
-                        <Separator className="w-full bg-white/20" />
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="icon" className="absolute bg-black/50 border-white/20 hover:bg-black/30 rounded-full">
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="center" className="bg-black/80 text-white border-white/20">
-                                <DropdownMenuItem onClick={() => router.push('/signup-ura')} className="cursor-pointer hover:bg-primary/20">
-                                    <UraIcon className="mr-2 h-4 w-4 text-primary" />
-                                    <span>Login with URA</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setIsCmdOpen(true)} className="cursor-pointer hover:bg-primary/20">
-                                    <Terminal className="mr-2 h-4 w-4" />
-                                    <span>Open CMD</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
                 </div>
               </PopoverContent>
             </Popover>
@@ -271,6 +251,26 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                     <GoogleIcon className="mr-2 h-4 w-4" />
                     Google
                 </Button>
+            </div>
+             <div className="relative flex items-center justify-center">
+                <Separator className="w-full bg-white/20" />
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon" className="absolute bg-black/50 border-white/20 hover:bg-black/30 rounded-full">
+                            <MoreVertical className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="bg-black/80 text-white border-white/20">
+                        <DropdownMenuItem onClick={() => router.push('/signup-ura')} className="cursor-pointer hover:bg-primary/20">
+                            <UraIcon className="mr-2 h-4 w-4 text-primary" />
+                            <span>Login with URA</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setIsCmdOpen(true)} className="cursor-pointer hover:bg-primary/20">
+                            <Terminal className="mr-2 h-4 w-4" />
+                            <span>Open CMD</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 pt-4">

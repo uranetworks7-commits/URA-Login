@@ -149,7 +149,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle }: Comman
             <Terminal /> URA Command Interface
           </DialogTitle>
           <DialogDescription className="text-white/70">
-            Enter commands to interact with the application UI. Type `help` for a list of commands.
+            Please Enter Your Command For Commit Changes
           </DialogDescription>
         </DialogHeader>
         <ScrollArea ref={scrollAreaRef} className="flex-1 w-full bg-black/50 rounded-md p-4 font-mono text-sm border border-primary/20">
