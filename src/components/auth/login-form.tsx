@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -36,9 +37,20 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
+const UraIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+    <path d="M12 12L22 7" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+    <path d="M12 12V22" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+    <path d="M12 12L2 7" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+    <path d="M17 4.5L7 9.5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+  </svg>
+);
+
 
 export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   const { toast } = useToast();
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [defaultValues, setDefaultValues] = useState({ username: '', email: '' });
@@ -128,7 +140,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 </FormItem>
               )}
             />
-             <div className="flex items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => toast({ title: 'Please Create A GitHub Account' })}>
                 <Github className="mr-2 h-4 w-4" />
                 GitHub
@@ -138,6 +150,10 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 Google
               </Button>
             </div>
+            <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => router.push('/signup-ura')}>
+              <UraIcon className="mr-2 h-4 w-4 text-primary" />
+              Sign Up with URA
+            </Button>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 pt-4">
             <Button type="submit" className="w-full font-semibold" size="lg" disabled={isSubmitting}>

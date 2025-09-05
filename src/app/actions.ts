@@ -61,6 +61,38 @@ export async function createAccountRequest(data: UserData): Promise<{ success: b
     }
 }
 
+export interface UraSignupData {
+    moderatorId: string;
+    moderatorUsername: string;
+    serverId: string;
+    githubLink: string;
+    uraApiKey: string;
+}
+
+export async function createUraAccountRequest(data: UraSignupData): Promise<{ success: boolean; message: string }> {
+    console.log("Received URA Account Request:", data);
+    // Here you would typically save this data to a different path in Firebase,
+    // for example, `ura-requests/${data.moderatorId}`.
+    // For now, we'll just simulate a success response.
+    try {
+        const requestRef = ref(db, `ura_requests/${data.moderatorId}`);
+        const snapshot = await get(requestRef);
+        if(snapshot.exists()) {
+            return { success: false, message: 'A request with this Moderator ID already exists.'};
+        }
+        await set(requestRef, {
+            ...data,
+            requestedAt: new Date().toISOString(),
+            status: 'pending_review'
+        });
+        return { success: true, message: 'URA account request submitted successfully. It is now pending review.' };
+    } catch (error) {
+        console.error("URA account request error:", error);
+        return { success: false, message: 'Server error. Please try again later.' };
+    }
+}
+
+
 export async function loginUser(credentials: UserData): Promise<LoginResult> {
     const username = credentials.username.trim();
     const email = credentials.email.trim();
