@@ -81,18 +81,18 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-sm bg-card/80 backdrop-blur-sm">
+    <Card className="w-full max-w-sm bg-black/20 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/40">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader>
             <CardTitle className="text-2xl text-primary">Create Account</CardTitle>
-            <CardDescription>Your details must be verified by an admin. This may take 24-48 hours.</CardDescription>
+            <CardDescription className="text-white/70">Your details must be verified by an admin. This may take 24-48 hours.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <FormField control={form.control} name="username" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Username</FormLabel>
-                  <FormControl><Input placeholder="your_username" {...field} /></FormControl>
+                  <FormControl><Input placeholder="your_username" {...field} className="bg-white/10 border-white/20 focus:bg-white/20" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -100,7 +100,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
             <FormField control={form.control} name="email" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
-                  <FormControl><Input type="email" placeholder="m@example.com" {...field} /></FormControl>
+                  <FormControl><Input type="email" placeholder="m@example.com" {...field} className="bg-white/10 border-white/20 focus:bg-white/20" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -108,7 +108,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
             <FormField control={form.control} name="captcha" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Captcha: What is {captcha.num1} + {captcha.num2}?</FormLabel>
-                  <FormControl><Input type="number" placeholder="?" {...field} /></FormControl>
+                  <FormControl><Input type="number" placeholder="?" {...field} className="bg-white/10 border-white/20 focus:bg-white/20" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -136,7 +136,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
               {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
               Create Account
             </Button>
-            <Button variant="link" type="button" onClick={onLoginClick}>
+            <Button variant="link" type="button" onClick={onLoginClick} className="text-white/80 hover:text-white">
               Already have an account? Login
             </Button>
           </CardFooter>

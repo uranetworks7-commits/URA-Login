@@ -79,12 +79,12 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-sm bg-card/80 backdrop-blur-sm">
+    <Card className="w-full max-w-sm bg-black/20 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/40">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader>
             <CardTitle className="text-2xl text-primary">Login</CardTitle>
-            <CardDescription>Suggestion: Use lowercase for username and email for best results.</CardDescription>
+            <CardDescription className="text-white/70">Suggestion: Use lowercase for username and email for best results.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <FormField
@@ -94,7 +94,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="your_username" {...field} />
+                    <Input placeholder="your_username" {...field} className="bg-white/10 border-white/20 focus:bg-white/20" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -107,7 +107,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="m@example.com" {...field} />
+                    <Input type="email" placeholder="m@example.com" {...field} className="bg-white/10 border-white/20 focus:bg-white/20" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -123,7 +123,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
               )}
               Login
             </Button>
-            <Button variant="link" type="button" onClick={onSignupClick}>
+            <Button variant="link" type="button" onClick={onSignupClick} className="text-white/80 hover:text-white">
               Haven't an account? Create one
             </Button>
           </CardFooter>

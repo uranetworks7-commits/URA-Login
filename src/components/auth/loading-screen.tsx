@@ -45,7 +45,7 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
     <div className="flex h-screen w-full flex-col items-center justify-center gap-8 bg-transparent text-white">
       <div className="text-center rounded-xl bg-black/30 p-8 backdrop-blur-md">
         <h1 
-          className="text-5xl font-bold tracking-tighter"
+          className="text-4xl font-bold tracking-tighter"
           style={{
             color: 'hsl(var(--primary))',
             textShadow: '0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3)',
