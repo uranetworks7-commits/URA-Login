@@ -3,8 +3,7 @@
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-
-import type { BannedDetails, UserData, LoginResult } from '@/app/actions';
+import { loginUser, securitySystemCheck, type LoginResult, type UserData, type BannedDetails } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/auth/loading-screen';
@@ -12,8 +11,9 @@ import { LoginForm } from '@/components/auth/login-form';
 import { SignupForm } from '@/components/auth/signup-form';
 import { BannedScreen } from '@/components/auth/banned-screen';
 import { BackgroundImage } from '@/components/auth/background-image';
+import { SecurityCheckScreen } from '@/components/auth/security-check-screen';
 
-type AppState = 'loading' | 'auth' | 'banned' | 'loggedIn';
+type AppState = 'loading' | 'auth' | 'security_check' | 'banned' | 'loggedIn';
 type AuthMode = 'login' | 'signup';
 
 const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => (
@@ -35,6 +35,7 @@ export default function Home() {
   const [appState, setAppState] = useState<AppState>('loading');
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [banDetails, setBanDetails] = useState<BannedDetails | null>(null);
+  const [userForSecurityCheck, setUserForSecurityCheck] = useState<UserData | null>(null);
   const [loggedInUser, setLoggedInUser] = useState<UserData | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -64,23 +65,34 @@ export default function Home() {
   };
 
   const handleLoginResult = (result: LoginResult) => {
-    if (result.success) {
-      if (result.data) {
-        setLoggedInUser(result.data as UserData);
-      }
-      setAppState('loggedIn');
+    if (result.success && result.data && result.status === 'approved') {
+        setUserForSecurityCheck(result.data as UserData);
+        setAppState('security_check');
     } else if (result.status === 'banned' && result.data) {
         setBanDetails(result.data as BannedDetails);
         setAppState('banned');
     }
   };
   
+  const handleSecurityCheckResult = (result: LoginResult) => {
+    if (result.success && result.data) {
+      setLoggedInUser(result.data as UserData);
+      localStorage.setItem("successKey", "true");
+      setAppState('loggedIn');
+    } else if (result.status === 'banned' && result.data) {
+        localStorage.setItem("failedKey", "true");
+        setBanDetails(result.data as BannedDetails);
+        setAppState('banned');
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('successKey');
     localStorage.removeItem('username');
     localStorage.removeItem('api');
     localStorage.removeItem('failedKey');
     setLoggedInUser(null);
+    setUserForSecurityCheck(null);
     setAppState('auth');
     setAuthMode('login');
     setIsFlipped(false);
@@ -90,7 +102,7 @@ export default function Home() {
     setIsFlipped(prev => !prev);
     setTimeout(() => {
       setAuthMode(prev => prev === 'login' ? 'signup' : 'login');
-    }, 250); // Delay to match half of the flip animation
+    }, 250);
   }
   
   const CurrentScreen = () => {
@@ -113,6 +125,8 @@ export default function Home() {
             </div>
           </div>
         );
+       case 'security_check':
+        return userForSecurityCheck && <SecurityCheckScreen user={userForSecurityCheck} onResult={handleSecurityCheckResult} />;
       case 'banned':
         return banDetails && <BannedScreen details={banDetails} />;
       case 'loggedIn':

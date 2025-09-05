@@ -62,7 +62,7 @@ export async function createAccountRequest(data: UserData): Promise<{ success: b
     }
 }
 
-async function runSecurityCheck(user: UserData, activity: string): Promise<LoginResult> {
+export async function runSecurityCheckAndLogin(user: UserData, activity: string): Promise<LoginResult> {
     try {
         const result = await securitySystemCheck({
             username: user.username,
@@ -96,7 +96,7 @@ async function runSecurityCheck(user: UserData, activity: string): Promise<Login
                 data: { ...result, unbanAt },
             };
         }
-        return { success: true, message: 'Security check passed.', status: 'approved' };
+        return { success: true, message: 'Login successful!', status: 'approved', data: user };
     } catch (error) {
         console.error("Security check failed:", error);
         return { success: false, message: 'Could not complete security check.', status: 'error' };
@@ -104,7 +104,7 @@ async function runSecurityCheck(user: UserData, activity: string): Promise<Login
 }
 
 
-export async function loginUser(credentials: UserData, activity: string): Promise<LoginResult> {
+export async function loginUser(credentials: UserData): Promise<LoginResult> {
     const { username, email } = credentials;
     const userRef = ref(db, `users/${username.toLowerCase()}`);
     const snapshot = await get(userRef);
@@ -122,18 +122,15 @@ export async function loginUser(credentials: UserData, activity: string): Promis
         case 1:
             return { success: false, message: 'This account is pending for approval.', status: 'pending' };
         case 2:
-            const securityResult = await runSecurityCheck(credentials, activity);
-            if (!securityResult.success) {
-                return securityResult;
-            }
-            return { success: true, message: 'Login successful!', status: 'approved', data: { username, email } };
+            return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
         case 3:
             let unbanTimestamp;
             if (userData.unbanAt && userData.unbanAt !== 'Permanent') {
                 unbanTimestamp = new Date(userData.unbanAt).getTime();
                 if (Date.now() > unbanTimestamp) {
                     await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
-                    return loginUser(credentials, activity);
+                    // Re-call login to attempt security check after unban
+                    return loginUser(credentials);
                 }
             }
             return { success: false, message: 'Your account is banned.', status: 'banned', data: { banReason: userData.banReason, banDuration: userData.banDuration, unbanAt: unbanTimestamp } };
@@ -145,3 +142,5 @@ export async function loginUser(credentials: UserData, activity: string): Promis
             return { success: false, message: 'Unknown account status. Please contact support.', status: 'error' };
     }
 }
+
+export { securitySystemCheck };

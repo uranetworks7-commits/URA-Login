@@ -25,25 +25,9 @@ interface LoginFormProps {
   onLoginResult: (result: LoginResult) => void;
 }
 
-const activityLog = [
-    `Logged in from a new device.`,
-    `Network connection established via residential IP.`,
-    `Accessed standard application routes.`,
-    `Attempted to access admin-only endpoint '/api/admin/users' without permissions.`,
-    `File upload detected: 'profile_pic.jpg'. Scan clean.`,
-    `Multiple rapid requests to '/api/data' endpoint observed.`,
-    `Using a known VPN provider for connection.`
-];
-
 export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activity, setActivity] = useState('');
-
-  useEffect(() => {
-    // Generate random activity only on the client-side
-    setActivity(activityLog[Math.floor(Math.random() * activityLog.length)]);
-  }, []);
   
   const [defaultValues, setDefaultValues] = useState({ username: '', email: '' });
 
@@ -69,17 +53,13 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   async function onSubmit(data: LoginFormValues) {
     setIsSubmitting(true);
     try {
-      const randomActivity = `User ${data.username} ${activity}`;
-      const result = await loginUser(data, randomActivity);
+      const result = await loginUser(data);
       if (result.success) {
-        toast({ title: 'Success', description: result.message });
         localStorage.setItem("username", data.username);
         localStorage.setItem("api", data.email);
-        localStorage.setItem("successKey", "true");
         onLoginResult(result);
       } else {
         if (result.status === 'banned') {
-          localStorage.setItem("failedKey", "true");
           onLoginResult(result);
         } else {
           toast({
