@@ -66,7 +66,8 @@ export default function Home() {
     } else if (result.status === 'banned' && result.data) {
         localStorage.setItem("failedKey", "true");
         window.parent.postMessage({ type: "ban" }, "*");
-        alert("🚫 Your account is banned!");
+        setBannedDetails(result.data as BannedDetails);
+        setAppState('banned');
     }
   };
   

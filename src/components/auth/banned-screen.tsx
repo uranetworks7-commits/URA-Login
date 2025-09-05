@@ -55,6 +55,8 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
     window.location.reload();
   };
 
+  const isPermanent = banDuration === 'Permanent';
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-lg border-destructive bg-card/80 backdrop-blur-sm shadow-2xl shadow-destructive/20">
@@ -72,11 +74,11 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
               <span className="font-medium">Reason:</span> {banReason || 'Suspicious activity detected.'}
             </p>
             <p className="text-sm">
-              <span className="font-medium">Duration:</span> {banDuration || 'Permanent'}
+              <span className="font-medium">Duration:</span> {banDuration || 'Not specified'}
             </p>
           </div>
 
-          {timeLeft && unbanAt && banDuration !== 'Permanent' && (
+          {timeLeft && unbanAt && !isPermanent && (
             <div className="space-y-2 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-4">
               <h3 className="flex items-center justify-center gap-2 font-semibold text-yellow-600 dark:text-yellow-400">
                 <Timer className="h-5 w-5" />
@@ -92,14 +94,14 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
             </div>
           )}
           
-          {!timeLeft && banDuration !== 'Permanent' && unbanAt && (
+          {!timeLeft && !isPermanent && unbanAt && (
              <div className="space-y-4">
                 <p className="text-green-600 dark:text-green-400">Your ban duration is over.</p>
                 <Button onClick={handleRefresh}>Click here to Login</Button>
             </div>
           )}
 
-          {banDuration === 'Permanent' && (
+          {isPermanent && (
             <div className="flex items-center justify-center gap-2 rounded-lg bg-destructive/10 p-4 text-destructive">
               <AlertTriangle className="h-5 w-5" />
               <p className="font-medium">This ban is permanent.</p>

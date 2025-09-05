@@ -75,26 +75,48 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         return { success: false, message: 'Invalid username or email.', status: 'invalid_credentials' };
     }
     
+    let unbanTimestamp;
+
     switch (userData.status) {
         case 1:
             return { success: false, message: 'This account is pending for approval.', status: 'pending' };
         case 2:
             return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
         case 3:
-            let unbanTimestamp;
+            return { success: false, message: 'Your account is permanently banned.', status: 'banned', data: { banReason: userData.banReason || 'Violation of terms', banDuration: 'Permanent' } };
+        
+        case 4: // 24-hour ban
+            unbanTimestamp = new Date(userData.bannedAt).getTime() + (24 * 60 * 60 * 1000);
+            if (Date.now() > unbanTimestamp) {
+                await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
+                return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
+            }
+            return { success: false, message: 'Your account is banned for 24 hours.', status: 'banned', data: { banReason: userData.banReason || 'Temporary suspension', banDuration: '24 Hours', unbanAt: unbanTimestamp } };
+
+        case 5: // 7-day ban
+            unbanTimestamp = new Date(userData.bannedAt).getTime() + (7 * 24 * 60 * 60 * 1000);
+            if (Date.now() > unbanTimestamp) {
+                await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
+                return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
+            }
+            return { success: false, message: 'Your account is banned for 7 days.', status: 'banned', data: { banReason: userData.banReason || 'Extended suspension', banDuration: '7 Days', unbanAt: unbanTimestamp } };
+        
+        case 6:
+            return { success: false, message: 'This account has been deleted.', status: 'deleted' };
+        
+        case 7:
+            return { success: false, message: 'A server error occurred with your account. Please contact support.', status: 'error' };
+        
+        default:
+            // This handles the old ban status `3` with a potentially dynamic unbanAt for backward compatibility.
             if (userData.unbanAt && userData.unbanAt !== 'Permanent') {
                 unbanTimestamp = new Date(userData.unbanAt).getTime();
                 if (Date.now() > unbanTimestamp) {
                     await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
                      return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
                 }
+                 return { success: false, message: 'Your account is temporarily banned.', status: 'banned', data: { banReason: userData.banReason, banDuration: userData.banDuration, unbanAt: unbanTimestamp } };
             }
-            return { success: false, message: 'Your account is banned.', status: 'banned', data: { banReason: userData.banReason, banDuration: userData.banDuration, unbanAt: unbanTimestamp } };
-        case 4:
-            return { success: false, message: 'This account has been deleted.', status: 'deleted' };
-        case 5:
-            return { success: false, message: 'A server error occurred with your account. Please contact support.', status: 'error' };
-        default:
             return { success: false, message: 'Unknown account status. Please contact support.', status: 'error' };
     }
 }
