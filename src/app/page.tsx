@@ -55,15 +55,7 @@ export default function Home() {
     if (!noticeAgreed) {
         setAppState('permission');
     } else {
-        const rememberMe = localStorage.getItem('rememberMe') === 'true';
-        const savedUsername = localStorage.getItem('username');
-        const savedEmail = localStorage.getItem('api');
-        if(rememberMe && savedUsername && savedEmail){
-            setQuickLoginUser({username: savedUsername, email: savedEmail});
-            setAppState('quickLogin');
-        } else {
-            setAppState('loading');
-        }
+        setAppState('loading');
     }
   }, []);
 
@@ -73,7 +65,16 @@ export default function Home() {
   }
 
   const handleLoadingComplete = () => {
-     setAppState('auth');
+    const rememberMe = localStorage.getItem('rememberMe') === 'true';
+    const savedUsername = localStorage.getItem('username');
+    const savedEmail = localStorage.getItem('api');
+    
+    if(rememberMe && savedUsername && savedEmail) {
+        setQuickLoginUser({username: savedUsername, email: savedEmail});
+        setAppState('quickLogin');
+    } else {
+        setAppState('auth');
+    }
   };
 
   const handleLoginResult = (result: LoginResult) => {
@@ -162,6 +163,7 @@ export default function Home() {
       case 'serverError':
         return <ServerErrorScreen />;
       default:
+        // Fallback to loading screen
         return <LoadingScreen onComplete={handleLoadingComplete} />;
     }
   };
