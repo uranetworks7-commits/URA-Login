@@ -42,7 +42,7 @@ export interface LoginResult {
 
 export async function createAccountRequest(data: UserData): Promise<{ success: boolean; message: string }> {
     const { username, email } = data;
-    const userRef = ref(db, `users/${username.toLowerCase()}`);
+    const userRef = ref(db, `users/${username.toLowerCase().trim()}`);
     const snapshot = await get(userRef);
 
     if (snapshot.exists()) {
@@ -51,7 +51,7 @@ export async function createAccountRequest(data: UserData): Promise<{ success: b
 
     try {
         await set(userRef, {
-            email,
+            email: email.trim(),
             status: 1, // Pending Approval
             createdAt: new Date().toISOString(),
         });
@@ -62,7 +62,9 @@ export async function createAccountRequest(data: UserData): Promise<{ success: b
 }
 
 export async function loginUser(credentials: UserData): Promise<LoginResult> {
-    const { username, email } = credentials;
+    const username = credentials.username.trim();
+    const email = credentials.email.trim();
+    
     const userRef = ref(db, `users/${username.toLowerCase()}`);
     const snapshot = await get(userRef);
 
