@@ -146,7 +146,7 @@ export default function Home() {
         return quickLoginUser && <QuickLoginForm user={quickLoginUser} onLoginResult={handleLoginResult} onExit={handleExitQuickLogin} autoOpen={autoOpen} />;
       case 'auth':
         return (
-          <div className="flex min-h-screen items-start justify-center p-4 pt-24 [perspective:1000px]">
+          <div className="flex min-h-screen items-start justify-center p-4 pt-16 [perspective:1000px]">
              <div className={cn('relative w-full max-w-lg transition-transform duration-700 [transform-style:preserve-3d]', { '[transform:rotateY(180deg)]': isFlipped })}>
                 <div className="absolute w-full [backface-visibility:hidden]">
                     <LoginForm onSignupClick={toggleAuthMode} onLoginResult={handleLoginResult} onHackEffectToggle={setIsHackEffectActive} />
