@@ -77,7 +77,7 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
             </p>
           </div>
 
-          {timeLeft && !isPermanent && (
+          {unbanAt && timeLeft && !isPermanent && (
             <div className="space-y-2 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-4">
               <h3 className="flex items-center justify-center gap-2 font-semibold text-yellow-600 dark:text-yellow-400">
                 <Timer className="h-5 w-5" />

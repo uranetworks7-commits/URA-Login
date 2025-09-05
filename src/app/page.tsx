@@ -12,8 +12,9 @@ import { SignupForm } from '@/components/auth/signup-form';
 import { BackgroundImage } from '@/components/auth/background-image';
 import { BannedScreen } from '@/components/auth/banned-screen';
 import { PermissionNotice } from '@/components/auth/permission-notice';
+import { ServerErrorScreen } from '@/components/auth/server-error-screen';
 
-type AppState = 'permission' | 'loading' | 'auth' | 'loggedIn' | 'banned';
+type AppState = 'permission' | 'loading' | 'auth' | 'loggedIn' | 'banned' | 'serverError';
 type AuthMode = 'login' | 'signup';
 
 const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => {
@@ -80,6 +81,8 @@ export default function Home() {
         window.parent.postMessage({ type: "ban" }, "*");
         setBannedDetails(result.data as BannedDetails);
         setAppState('banned');
+    } else if (result.status === 'error') {
+        setAppState('serverError');
     }
   };
   
@@ -132,6 +135,8 @@ export default function Home() {
         );
       case 'banned':
         return bannedDetails && <BannedScreen details={bannedDetails} />;
+      case 'serverError':
+        return <ServerErrorScreen />;
       default:
         return null;
     }
