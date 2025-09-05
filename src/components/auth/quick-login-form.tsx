@@ -1,10 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Loader2, LogIn, User } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Loader2, LogIn, User, X } from 'lucide-react';
 import { loginUser, type UserData, type LoginResult } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
@@ -21,6 +18,7 @@ interface QuickLoginFormProps {
 export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }: QuickLoginFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(autoOpen);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   async function handleQuickLogin() {
     setIsSubmitting(true);
@@ -50,19 +48,30 @@ export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }
       });
       onExit();
     } finally {
-      // Don't set submitting to false if it was an auto-open
+      // Don't set submitting to false if it was an auto-open, as the component will unmount
       if (!autoOpen) {
         setIsSubmitting(false);
       }
     }
   }
+  
+  const handleCancel = () => {
+    if (timerRef.current) {
+        clearTimeout(timerRef.current);
+    }
+    onExit();
+  }
 
   useEffect(() => {
     if (autoOpen) {
-      const timer = setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         handleQuickLogin();
       }, 1500);
-      return () => clearTimeout(timer);
+      return () => {
+        if(timerRef.current) {
+            clearTimeout(timerRef.current)
+        };
+      }
     }
   }, [autoOpen]);
 
@@ -78,7 +87,7 @@ export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }
                   {isSubmitting && autoOpen ? "Automatically logging in..." : "Welcome back!"}
                 </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col gap-4">
                  <Button onClick={handleQuickLogin} className="w-full font-semibold" size="lg" disabled={isSubmitting}>
                     {isSubmitting ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -87,6 +96,12 @@ export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }
                     )}
                     Login as {user.username}
                 </Button>
+                {isSubmitting && autoOpen && (
+                    <Button onClick={handleCancel} variant="destructive" className="w-full font-semibold" size="lg">
+                        <X className="mr-2 h-4 w-4" />
+                        Cancel
+                    </Button>
+                )}
             </CardContent>
             <CardFooter>
                  <Button variant="link" type="button" onClick={onExit} className="w-full text-white/60 hover:text-white" disabled={isSubmitting && autoOpen}>
