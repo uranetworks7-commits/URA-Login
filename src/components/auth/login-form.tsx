@@ -105,6 +105,21 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
       setIsSubmitting(false);
     }
   }
+  
+  const handleGoogleClick = () => {
+    const savedEmail = localStorage.getItem('api');
+    if (savedEmail) {
+        toast({
+            title: 'Account Already Chosen',
+            description: `Continuing with ${savedEmail}.`,
+        });
+    } else {
+        toast({
+            title: 'No Account Found',
+            description: 'Please sign in with Google.',
+        });
+    }
+  };
 
   return (
     <Card className="w-full max-w-lg bg-black/50 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
@@ -146,7 +161,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 <Github className="mr-2 h-4 w-4" />
                 GitHub
               </Button>
-              <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => toast({ title: 'Google Sign-In is coming soon!' })}>
+              <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={handleGoogleClick}>
                 <GoogleIcon className="mr-2 h-4 w-4" />
                 Google
               </Button>
