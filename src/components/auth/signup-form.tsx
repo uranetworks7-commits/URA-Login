@@ -48,7 +48,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
       username: '',
       email: '',
       captcha: '',
-      terms: false,
+      terms: true,
     },
   });
 
