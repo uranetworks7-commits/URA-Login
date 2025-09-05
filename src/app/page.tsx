@@ -10,7 +10,6 @@ import { LoadingScreen } from '@/components/auth/loading-screen';
 import { LoginForm } from '@/components/auth/login-form';
 import { SignupForm } from '@/components/auth/signup-form';
 import { BackgroundImage } from '@/components/auth/background-image';
-import { LoginSuccessDialog } from '@/components/auth/login-success-dialog';
 import { BannedScreen } from '@/components/auth/banned-screen';
 
 type AppState = 'loading' | 'auth' | 'loggedIn' | 'banned';
@@ -38,7 +37,6 @@ export default function Home() {
   const [bannedDetails, setBannedDetails] = useState<BannedDetails | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -52,12 +50,12 @@ export default function Home() {
     if (result.success && result.data && result.status === 'approved') {
         const user = result.data as UserData;
         setLoggedInUser(user);
-        setShowSuccessPopup(true);
         window.parent.postMessage({ 
           type: "loginSuccess", 
           username: user.username,
           api: user.email 
         }, "*");
+        window.location.href = 'file:///android_asset/htmlapp/root/main.html';
     } else if (result.status === 'banned' && result.data) {
         localStorage.setItem("failedKey", "true");
         window.parent.postMessage({ type: "ban" }, "*");
@@ -105,7 +103,6 @@ export default function Home() {
           </div>
         );
       case 'loggedIn':
-        // When logged in, we stay on this screen, but the dialog will be controlled by `showSuccessPopup`
         return (
              <div className="flex min-h-screen items-center justify-center p-4">
                 {loggedInUser && <LoggedInScreen user={loggedInUser} onLogout={handleLogout} />}
@@ -123,21 +120,8 @@ export default function Home() {
     <main className="relative flex min-h-screen flex-col items-center justify-center">
       <BackgroundImage />
       <div className="relative z-10 w-full">
-        {showSuccessPopup ? null : <CurrentScreen />}
+        <CurrentScreen />
       </div>
-       <LoginSuccessDialog
-        open={showSuccessPopup}
-        onOpenChange={setShowSuccessPopup}
-        onOpenApp={() => {
-          setAppState('loggedIn');
-          setShowSuccessPopup(false);
-          window.location.href = 'file:///android_asset/htmlapp/root/main.html';
-        }}
-        onCancel={() => {
-            setAppState('loggedIn');
-            setShowSuccessPopup(false);
-        }}
-      />
     </main>
   );
 }
