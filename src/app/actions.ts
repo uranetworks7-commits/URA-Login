@@ -62,28 +62,15 @@ export async function createAccountRequest(data: UserData): Promise<{ success: b
     }
 }
 
-async function runSecurityCheck(user: UserData): Promise<LoginResult> {
-    const activityLog = [
-        `User ${user.username} logged in from a new device.`,
-        `Network connection established via residential IP.`,
-        `Accessed standard application routes.`,
-        `Attempted to access admin-only endpoint '/api/admin/users' without permissions.`,
-        `File upload detected: 'profile_pic.jpg'. Scan clean.`,
-        `Multiple rapid requests to '/api/data' endpoint observed.`,
-        `Using a known VPN provider for connection.`
-    ];
-
-    const randomActivity = activityLog[Math.floor(Math.random() * activityLog.length)];
-
+async function runSecurityCheck(user: UserData, activity: string): Promise<LoginResult> {
     try {
         const result = await securitySystemCheck({
             username: user.username,
             email: user.email,
-            activityLog: randomActivity,
+            activityLog: activity,
         });
 
         if (result.isBanned) {
-            localStorage.setItem("failedKey", "true");
             let unbanAt;
             if (result.banDuration && result.banDuration.includes('hour')) {
                 const hours = parseInt(result.banDuration, 10);
@@ -117,7 +104,7 @@ async function runSecurityCheck(user: UserData): Promise<LoginResult> {
 }
 
 
-export async function loginUser(credentials: UserData): Promise<LoginResult> {
+export async function loginUser(credentials: UserData, activity: string): Promise<LoginResult> {
     const { username, email } = credentials;
     const userRef = ref(db, `users/${username}`);
     const snapshot = await get(userRef);
@@ -135,14 +122,9 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         case 1:
             return { success: false, message: 'Your account is pending approval.', status: 'pending' };
         case 2:
-            const securityResult = await runSecurityCheck(credentials);
+            const securityResult = await runSecurityCheck(credentials, activity);
             if (!securityResult.success) {
                 return securityResult;
-            }
-             if (typeof window !== 'undefined') {
-                localStorage.setItem("username", username);
-                localStorage.setItem("api", email);
-                localStorage.setItem("successKey", "true");
             }
             return { success: true, message: 'Login successful!', status: 'approved', data: { username, email } };
         case 3:
@@ -151,7 +133,7 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
                 unbanTimestamp = new Date(userData.unbanAt).getTime();
                 if (Date.now() > unbanTimestamp) {
                     await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
-                    return loginUser(credentials);
+                    return loginUser(credentials, activity);
                 }
             }
             return { success: false, message: 'Your account is banned.', status: 'banned', data: { banReason: userData.banReason, banDuration: userData.banDuration, unbanAt: unbanTimestamp } };

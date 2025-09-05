@@ -25,6 +25,16 @@ interface LoginFormProps {
   onLoginResult: (result: LoginResult) => void;
 }
 
+const activityLog = [
+    `Logged in from a new device.`,
+    `Network connection established via residential IP.`,
+    `Accessed standard application routes.`,
+    `Attempted to access admin-only endpoint '/api/admin/users' without permissions.`,
+    `File upload detected: 'profile_pic.jpg'. Scan clean.`,
+    `Multiple rapid requests to '/api/data' endpoint observed.`,
+    `Using a known VPN provider for connection.`
+];
+
 export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,13 +57,14 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   
   useEffect(() => {
       form.reset(defaultValues)
-  }, [defaultValues, form])
+  }, [defaultValues, form]);
 
 
   async function onSubmit(data: LoginFormValues) {
     setIsSubmitting(true);
     try {
-      const result = await loginUser(data);
+      const randomActivity = `User ${data.username} ${activityLog[Math.floor(Math.random() * activityLog.length)]}`;
+      const result = await loginUser(data, randomActivity);
       if (result.success) {
         toast({ title: 'Success', description: result.message });
         localStorage.setItem("username", data.username);
@@ -62,6 +73,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
         onLoginResult(result);
       } else {
         if (result.status === 'banned') {
+          localStorage.setItem("failedKey", "true");
           onLoginResult(result);
         } else {
           toast({

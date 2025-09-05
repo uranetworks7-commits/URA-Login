@@ -35,8 +35,15 @@ export default function Home() {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [banDetails, setBanDetails] = useState<BannedDetails | null>(null);
   const [loggedInUser, setLoggedInUser] = useState<UserData | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
     const successKey = localStorage.getItem('successKey');
     const username = localStorage.getItem('username');
     const email = localStorage.getItem('api');
@@ -44,7 +51,7 @@ export default function Home() {
     if (appState === 'loading' && successKey === 'true' && username && email) {
       setLoggedInUser({ username, email });
     }
-  }, [appState]);
+  }, [appState, isClient]);
 
   const handleLoadingComplete = () => {
     if (loggedInUser) {
@@ -68,17 +75,21 @@ export default function Home() {
     localStorage.removeItem('successKey');
     localStorage.removeItem('username');
     localStorage.removeItem('api');
+    localStorage.removeItem('failedKey');
     setLoggedInUser(null);
     setAppState('auth');
     setAuthMode('login');
   };
-
-  return (
-    <div className="relative">
-      <SnowflakeBackground />
-      <div className="relative z-10">
-        {appState === 'loading' && <LoadingScreen onComplete={handleLoadingComplete} />}
-        {appState === 'auth' && (
+  
+  const CurrentScreen = () => {
+    if (!isClient) {
+      return <LoadingScreen onComplete={() => {}} />;
+    }
+    switch (appState) {
+      case 'loading':
+        return <LoadingScreen onComplete={handleLoadingComplete} />;
+      case 'auth':
+        return (
           <div className="flex min-h-screen items-center justify-center">
             {authMode === 'login' ? (
               <LoginForm onSignupClick={() => setAuthMode('signup')} onLoginResult={handleLoginResult} />
@@ -86,11 +97,22 @@ export default function Home() {
               <SignupForm onLoginClick={() => setAuthMode('login')} />
             )}
           </div>
-        )}
-        {appState === 'banned' && banDetails && <BannedScreen details={banDetails} />}
-        {appState === 'loggedIn' && loggedInUser && (
-          <LoggedInScreen user={loggedInUser} onLogout={handleLogout} />
-        )}
+        );
+      case 'banned':
+        return banDetails && <BannedScreen details={banDetails} />;
+      case 'loggedIn':
+        return loggedInUser && <LoggedInScreen user={loggedInUser} onLogout={handleLogout} />;
+      default:
+        return null;
+    }
+  };
+
+
+  return (
+    <div className="relative">
+      <SnowflakeBackground />
+      <div className="relative z-10">
+        <CurrentScreen />
       </div>
     </div>
   );
