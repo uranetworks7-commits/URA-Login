@@ -44,7 +44,7 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
         setTimeLeft(newTimeLeft);
       } else {
         clearInterval(timer);
-        // Optionally trigger a page refresh to allow login attempt
+        setTimeLeft(null);
       }
     }, 1000);
 
