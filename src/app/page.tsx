@@ -15,20 +15,27 @@ import { BannedScreen } from '@/components/auth/banned-screen';
 type AppState = 'loading' | 'auth' | 'loggedIn' | 'banned';
 type AuthMode = 'login' | 'signup';
 
-const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => (
-  <div className="flex items-center justify-center min-h-screen">
-    <Card className="w-full max-w-md bg-card/80 backdrop-blur-sm">
-      <CardHeader>
-        <CardTitle className="text-center text-2xl text-primary">Welcome, {user.username}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col items-center gap-4">
-        <p>You are successfully logged in.</p>
-        <p className="text-sm text-muted-foreground">Email: {user.email}</p>
-        <Button onClick={onLogout}>Logout</Button>
-      </CardContent>
-    </Card>
-  </div>
-);
+const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => {
+  useEffect(() => {
+    if (user) {
+      window.location.href = 'file:///android_asset/htmlapp/root/main.html';
+    }
+  }, [user]);
+
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <Card className="w-full max-w-md bg-card/80 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-center text-2xl text-primary">Redirecting...</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-4">
+          <p>Login successful. Preparing your dashboard...</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('loading');
@@ -49,13 +56,13 @@ export default function Home() {
   const handleLoginResult = (result: LoginResult) => {
     if (result.success && result.data && result.status === 'approved') {
         const user = result.data as UserData;
-        setLoggedInUser(user);
         window.parent.postMessage({ 
           type: "loginSuccess", 
           username: user.username,
           api: user.email 
         }, "*");
-        window.location.href = 'file:///android_asset/htmlapp/root/main.html';
+        setLoggedInUser(user);
+        setAppState('loggedIn');
     } else if (result.status === 'banned' && result.data) {
         localStorage.setItem("failedKey", "true");
         window.parent.postMessage({ type: "ban" }, "*");
