@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -15,11 +15,12 @@ interface QuickLoginFormProps {
   user: UserData;
   onLoginResult: (result: LoginResult) => void;
   onExit: () => void;
+  autoOpen?: boolean;
 }
 
-export function QuickLoginForm({ user, onLoginResult, onExit }: QuickLoginFormProps) {
+export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }: QuickLoginFormProps) {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(autoOpen);
 
   async function handleQuickLogin() {
     setIsSubmitting(true);
@@ -30,6 +31,7 @@ export function QuickLoginForm({ user, onLoginResult, onExit }: QuickLoginFormPr
         onLoginResult(result);
       } else {
          localStorage.removeItem("rememberMe");
+         localStorage.removeItem("autoOpener");
          if (result.status !== 'banned') {
             toast({
               variant: 'destructive',
@@ -48,9 +50,21 @@ export function QuickLoginForm({ user, onLoginResult, onExit }: QuickLoginFormPr
       });
       onExit();
     } finally {
-      setIsSubmitting(false);
+      // Don't set submitting to false if it was an auto-open
+      if (!autoOpen) {
+        setIsSubmitting(false);
+      }
     }
   }
+
+  useEffect(() => {
+    if (autoOpen) {
+      const timer = setTimeout(() => {
+        handleQuickLogin();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [autoOpen]);
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -60,7 +74,9 @@ export function QuickLoginForm({ user, onLoginResult, onExit }: QuickLoginFormPr
                     <User className="h-12 w-12 text-primary" />
                 </div>
                 <CardTitle className="text-2xl text-primary font-bold pt-4">{user.username}</CardTitle>
-                <CardDescription className="text-white/70 pt-1">Welcome back!</CardDescription>
+                <CardDescription className="text-white/70 pt-1">
+                  {isSubmitting && autoOpen ? "Automatically logging in..." : "Welcome back!"}
+                </CardDescription>
             </CardHeader>
             <CardContent>
                  <Button onClick={handleQuickLogin} className="w-full font-semibold" size="lg" disabled={isSubmitting}>
@@ -73,7 +89,7 @@ export function QuickLoginForm({ user, onLoginResult, onExit }: QuickLoginFormPr
                 </Button>
             </CardContent>
             <CardFooter>
-                 <Button variant="link" type="button" onClick={onExit} className="w-full text-white/60 hover:text-white">
+                 <Button variant="link" type="button" onClick={onExit} className="w-full text-white/60 hover:text-white" disabled={isSubmitting && autoOpen}>
                     Not you? Log in with another account
                 </Button>
             </CardFooter>

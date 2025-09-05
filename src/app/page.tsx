@@ -3,7 +3,7 @@
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { type LoginResult, type UserData, type BannedDetails, loginUser } from '@/app/actions';
+import { type LoginResult, type UserData, type BannedDetails } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/auth/loading-screen';
@@ -48,6 +48,7 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [quickLoginUser, setQuickLoginUser] = useState<UserData | null>(null);
+  const [autoOpen, setAutoOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -68,9 +69,11 @@ export default function Home() {
     const rememberMe = localStorage.getItem('rememberMe') === 'true';
     const savedUsername = localStorage.getItem('username');
     const savedEmail = localStorage.getItem('api');
+    const autoOpener = localStorage.getItem('autoOpener') === 'true';
     
     if(rememberMe && savedUsername && savedEmail) {
         setQuickLoginUser({username: savedUsername, email: savedEmail});
+        setAutoOpen(autoOpener);
         setAppState('quickLogin');
     } else {
         setAppState('auth');
@@ -117,6 +120,7 @@ export default function Home() {
     localStorage.removeItem('rememberMe');
     localStorage.removeItem('username');
     localStorage.removeItem('api');
+    localStorage.removeItem('autoOpener');
     setQuickLoginUser(null);
     setAppState('auth');
   }
@@ -138,7 +142,7 @@ export default function Home() {
       case 'loading':
         return <LoadingScreen onComplete={handleLoadingComplete} />;
       case 'quickLogin':
-        return quickLoginUser && <QuickLoginForm user={quickLoginUser} onLoginResult={handleLoginResult} onExit={handleExitQuickLogin} />;
+        return quickLoginUser && <QuickLoginForm user={quickLoginUser} onLoginResult={handleLoginResult} onExit={handleExitQuickLogin} autoOpen={autoOpen} />;
       case 'auth':
         return (
           <div className="flex min-h-screen items-start justify-center p-4 pt-24 [perspective:1000px]">
