@@ -2,6 +2,7 @@
 
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 import type { BannedDetails, UserData, LoginResult } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ export default function Home() {
   const [banDetails, setBanDetails] = useState<BannedDetails | null>(null);
   const [loggedInUser, setLoggedInUser] = useState<UserData | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -79,7 +81,15 @@ export default function Home() {
     setLoggedInUser(null);
     setAppState('auth');
     setAuthMode('login');
+    setIsFlipped(false);
   };
+
+  const toggleAuthMode = () => {
+    setIsFlipped(prev => !prev);
+    setTimeout(() => {
+      setAuthMode(prev => prev === 'login' ? 'signup' : 'login');
+    }, 250); // Delay to match half of the flip animation
+  }
   
   const CurrentScreen = () => {
     if (!isClient) {
@@ -90,12 +100,15 @@ export default function Home() {
         return <LoadingScreen onComplete={handleLoadingComplete} />;
       case 'auth':
         return (
-          <div className="flex min-h-screen items-center justify-center">
-            {authMode === 'login' ? (
-              <LoginForm onSignupClick={() => setAuthMode('signup')} onLoginResult={handleLoginResult} />
-            ) : (
-              <SignupForm onLoginClick={() => setAuthMode('login')} />
-            )}
+          <div className="flex min-h-screen items-center justify-center [perspective:1000px]">
+             <div className={cn('relative w-full max-w-sm transition-transform duration-700 [transform-style:preserve-3d]', { '[transform:rotateY(180deg)]': isFlipped })}>
+                <div className="absolute w-full [backface-visibility:hidden]">
+                    <LoginForm onSignupClick={toggleAuthMode} onLoginResult={handleLoginResult} />
+                </div>
+                <div className="absolute w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                    <SignupForm onLoginClick={toggleAuthMode} />
+                </div>
+            </div>
           </div>
         );
       case 'banned':

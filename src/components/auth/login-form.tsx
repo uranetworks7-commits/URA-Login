@@ -38,6 +38,12 @@ const activityLog = [
 export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activity, setActivity] = useState('');
+
+  useEffect(() => {
+    // Generate random activity only on the client-side
+    setActivity(activityLog[Math.floor(Math.random() * activityLog.length)]);
+  }, []);
   
   const [defaultValues, setDefaultValues] = useState({ username: '', email: '' });
 
@@ -63,7 +69,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   async function onSubmit(data: LoginFormValues) {
     setIsSubmitting(true);
     try {
-      const randomActivity = `User ${data.username} ${activityLog[Math.floor(Math.random() * activityLog.length)]}`;
+      const randomActivity = `User ${data.username} ${activity}`;
       const result = await loginUser(data, randomActivity);
       if (result.success) {
         toast({ title: 'Success', description: result.message });
