@@ -3,7 +3,7 @@
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { type LoginResult, type UserData, type BannedDetails } from '@/app/actions';
+import { type LoginResult, type UserData, type BannedDetails, loginUser } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/auth/loading-screen';
@@ -13,8 +13,9 @@ import { BackgroundImage } from '@/components/auth/background-image';
 import { BannedScreen } from '@/components/auth/banned-screen';
 import { PermissionNotice } from '@/components/auth/permission-notice';
 import { ServerErrorScreen } from '@/components/auth/server-error-screen';
+import { QuickLoginForm } from '@/components/auth/quick-login-form';
 
-type AppState = 'permission' | 'loading' | 'auth' | 'loggedIn' | 'banned' | 'serverError';
+type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError';
 type AuthMode = 'login' | 'signup';
 
 const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => {
@@ -46,6 +47,7 @@ export default function Home() {
   const [bannedDetails, setBannedDetails] = useState<BannedDetails | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [quickLoginUser, setQuickLoginUser] = useState<UserData | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -53,7 +55,15 @@ export default function Home() {
     if (!noticeAgreed) {
         setAppState('permission');
     } else {
-        setAppState('loading');
+        const rememberMe = localStorage.getItem('rememberMe') === 'true';
+        const savedUsername = localStorage.getItem('username');
+        const savedEmail = localStorage.getItem('api');
+        if(rememberMe && savedUsername && savedEmail){
+            setQuickLoginUser({username: savedUsername, email: savedEmail});
+            setAppState('quickLogin');
+        } else {
+            setAppState('loading');
+        }
     }
   }, []);
 
@@ -63,7 +73,7 @@ export default function Home() {
   }
 
   const handleLoadingComplete = () => {
-    setAppState('auth');
+     setAppState('auth');
   };
 
   const handleLoginResult = (result: LoginResult) => {
@@ -87,16 +97,28 @@ export default function Home() {
   };
   
   const handleLogout = () => {
+    // We keep username and api key for the quick login form, but remove success key.
     localStorage.removeItem('successKey');
-    localStorage.removeItem('username');
-    localStorage.removeItem('api');
     localStorage.removeItem('failedKey');
     setLoggedInUser(null);
     setBannedDetails(null);
-    setAppState('auth');
-    setAuthMode('login');
+    const rememberMe = localStorage.getItem('rememberMe') === 'true';
+    if(rememberMe && quickLoginUser){
+        setAppState('quickLogin');
+    } else {
+        setAppState('auth');
+        setAuthMode('login');
+    }
     setIsFlipped(false);
   };
+  
+  const handleExitQuickLogin = () => {
+    localStorage.removeItem('rememberMe');
+    localStorage.removeItem('username');
+    localStorage.removeItem('api');
+    setQuickLoginUser(null);
+    setAppState('auth');
+  }
 
   const toggleAuthMode = () => {
     setIsFlipped(prev => !prev);
@@ -114,6 +136,8 @@ export default function Home() {
         return <PermissionNotice onAgree={handlePermissionAgree} />;
       case 'loading':
         return <LoadingScreen onComplete={handleLoadingComplete} />;
+      case 'quickLogin':
+        return quickLoginUser && <QuickLoginForm user={quickLoginUser} onLoginResult={handleLoginResult} onExit={handleExitQuickLogin} />;
       case 'auth':
         return (
           <div className="flex min-h-screen items-start justify-center p-4 pt-24 [perspective:1000px]">
@@ -138,7 +162,7 @@ export default function Home() {
       case 'serverError':
         return <ServerErrorScreen />;
       default:
-        return null;
+        return <LoadingScreen onComplete={handleLoadingComplete} />;
     }
   };
 

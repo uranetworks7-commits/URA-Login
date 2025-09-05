@@ -15,10 +15,12 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Switch } from '@/components/ui/switch';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   email: z.string().email('Invalid email address. The @ symbol is mandatory.').min(1, 'Email is required'),
+  rememberMe: z.boolean().default(false),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -54,13 +56,14 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [defaultValues, setDefaultValues] = useState({ username: '', email: '' });
+  const [defaultValues, setDefaultValues] = useState({ username: '', email: '', rememberMe: false });
 
   useEffect(() => {
     const savedUsername = localStorage.getItem('username');
     const savedEmail = localStorage.getItem('api');
+    const rememberMe = localStorage.getItem('rememberMe') === 'true';
     if (savedUsername && savedEmail) {
-      setDefaultValues({ username: savedUsername, email: savedEmail });
+      setDefaultValues({ username: savedUsername, email: savedEmail, rememberMe: rememberMe });
     }
   }, []);
 
@@ -79,14 +82,22 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
     setIsSubmitting(true);
     try {
       const result = await loginUser(data);
+      
       if (result.success && result.status === 'approved') {
-        localStorage.setItem("username", data.username);
-        localStorage.setItem("api", data.email);
-        localStorage.setItem("successKey", "true");
-        onLoginResult(result);
+          localStorage.setItem("successKey", "true");
+          if(data.rememberMe){
+            localStorage.setItem("username", data.username);
+            localStorage.setItem("api", data.email);
+            localStorage.setItem("rememberMe", "true");
+          } else {
+             localStorage.removeItem("username");
+             localStorage.removeItem("api");
+             localStorage.removeItem("rememberMe");
+          }
       } else {
-        onLoginResult(result);
-        if (result.status !== 'banned') {
+         // if login fails for any reason other than success, disable remember me
+         localStorage.removeItem("rememberMe");
+         if (result.status !== 'banned') {
             toast({
               variant: 'destructive',
               title: 'Login Failed',
@@ -94,6 +105,8 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
             });
         }
       }
+      onLoginResult(result);
+
     } catch (error) {
       console.error("Login submission error:", error);
       toast({
@@ -153,6 +166,21 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                     <Input type="email" placeholder="m@example.com" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="rememberMe"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
+                    <FormLabel className="text-white/80">Remember Me</FormLabel>
+                    <FormControl>
+                        <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        />
+                    </FormControl>
                 </FormItem>
               )}
             />
