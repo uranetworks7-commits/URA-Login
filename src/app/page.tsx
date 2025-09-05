@@ -26,7 +26,7 @@ const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, on
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <Card className="w-full max-w-md bg-card/80 backdrop-blur-sm">
+      <Card className="w-full max-w-lg bg-card/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-center text-2xl text-primary">Redirecting...</CardTitle>
         </CardHeader>
@@ -117,7 +117,7 @@ export default function Home() {
       case 'auth':
         return (
           <div className="flex min-h-screen items-start justify-center p-4 pt-24 [perspective:1000px]">
-             <div className={cn('relative w-full max-w-md transition-transform duration-700 [transform-style:preserve-3d]', { '[transform:rotateY(180deg)]': isFlipped })}>
+             <div className={cn('relative w-full max-w-lg transition-transform duration-700 [transform-style:preserve-3d]', { '[transform:rotateY(180deg)]': isFlipped })}>
                 <div className="absolute w-full [backface-visibility:hidden]">
                     <LoginForm onSignupClick={toggleAuthMode} onLoginResult={handleLoginResult} />
                 </div>

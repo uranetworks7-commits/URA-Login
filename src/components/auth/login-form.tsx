@@ -82,7 +82,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md bg-black/50 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
+    <Card className="w-full max-w-lg bg-black/50 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader className="text-center">
