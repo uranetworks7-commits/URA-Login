@@ -243,7 +243,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                     </div>
                   </PopoverContent>
                 </Popover>
-                 <SettingsPopover onInternetAccessChange={setIsInternetAllowed} />
+                <SettingsPopover onInternetAccessChange={setIsInternetAllowed} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => toast({ title: 'Please Create A GitHub Account' })}>
