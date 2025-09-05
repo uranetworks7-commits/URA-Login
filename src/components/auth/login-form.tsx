@@ -90,6 +90,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
         }
       }
     } catch (error) {
+      console.error("Login submission error:", error);
       toast({
         variant: 'destructive',
         title: 'Error',
