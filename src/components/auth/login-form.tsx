@@ -166,7 +166,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Your Username</FormLabel>
                   <FormControl>
                     <Input placeholder="your_username" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" />
                   </FormControl>
@@ -179,7 +179,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Your Email id</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="m@example.com" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" />
                   </FormControl>
