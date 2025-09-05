@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, LogIn, Github, MoreVertical } from 'lucide-react';
+import { Loader2, LogIn, Github, MoreVertical, Zap } from 'lucide-react';
 import { loginUser, type LoginResult } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
@@ -174,7 +174,10 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
               name="rememberMe"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
-                    <FormLabel className="text-white/80">Remember Me</FormLabel>
+                    <FormLabel className="flex items-center gap-2 text-white/80">
+                        <Zap className="h-4 w-4 text-primary" />
+                        Auto Login
+                    </FormLabel>
                     <FormControl>
                         <Switch
                         checked={field.value}
