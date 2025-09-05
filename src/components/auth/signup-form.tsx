@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { TermsDialog } from './terms-dialog';
+import { Separator } from '@/components/ui/separator';
 
 const signupSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters').max(20).regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores.'),
@@ -86,7 +87,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader className="text-center">
             <CardTitle className="text-3xl text-primary font-bold">Create Account</CardTitle>
-            <CardDescription className="text-white/70 pt-2">Admin review may take 24-48 hours.</CardDescription>
+            <CardDescription className="text-white/70 pt-2">Suggestions System 2.0: Please enter everything in small letters.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <FormField control={form.control} name="username" render={({ field }) => (
@@ -136,6 +137,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
               {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
               Request Account
             </Button>
+            <Separator className="my-2 bg-white/20" />
             <Button variant="link" type="button" onClick={onLoginClick} className="text-white/80 hover:text-white">
               Already have an account? Login
             </Button>
