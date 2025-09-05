@@ -55,18 +55,32 @@ export default function Home() {
     } else if (result.status === 'banned' && result.data) {
         setBanDetails(result.data as BannedDetails);
         setAppState('banned');
+        localStorage.setItem("failedKey", "true");
+        window.parent.postMessage({ type: "ban" }, "*");
     }
   };
   
   const handleSecurityCheckResult = (result: LoginResult) => {
     if (result.success && result.data) {
-      setLoggedInUser(result.data as UserData);
+      const user = result.data as UserData;
+      setLoggedInUser(user);
       setAppState('loggedIn');
+      
+      localStorage.setItem("username", user.username);
+      localStorage.setItem("api", user.email);
+      localStorage.setItem("successKey", "true");
+      window.parent.postMessage({ 
+        type: "loginSuccess", 
+        username: user.username,
+        api: user.email 
+      }, "*");
+
     } else if (result.status === 'banned' && result.data) {
         localStorage.setItem("failedKey", "true");
         localStorage.removeItem('successKey');
         setBanDetails(result.data as BannedDetails);
         setAppState('banned');
+        window.parent.postMessage({ type: "ban" }, "*");
     }
   };
 
