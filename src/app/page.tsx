@@ -65,8 +65,10 @@ export default function Home() {
 
   const handleLoginResult = (result: LoginResult) => {
     if (result.success) {
+      if (result.data) {
         setLoggedInUser(result.data as UserData);
-        setAppState('loggedIn');
+      }
+      setAppState('loggedIn');
     } else if (result.status === 'banned' && result.data) {
         setBanDetails(result.data as BannedDetails);
         setAppState('banned');
