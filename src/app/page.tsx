@@ -10,7 +10,7 @@ import { LoadingScreen } from '@/components/auth/loading-screen';
 import { LoginForm } from '@/components/auth/login-form';
 import { SignupForm } from '@/components/auth/signup-form';
 import { BannedScreen } from '@/components/auth/banned-screen';
-import { SnowflakeBackground } from '@/components/auth/snowflake-background';
+import { BackgroundImage } from '@/components/auth/background-image';
 
 type AppState = 'loading' | 'auth' | 'banned' | 'loggedIn';
 type AuthMode = 'login' | 'signup';
@@ -110,7 +110,7 @@ export default function Home() {
 
   return (
     <div className="relative">
-      <SnowflakeBackground />
+      <BackgroundImage />
       <div className="relative z-10">
         <CurrentScreen />
       </div>
