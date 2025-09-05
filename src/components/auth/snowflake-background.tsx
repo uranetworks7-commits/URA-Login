@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Snowflake = ({ style }: { style: React.CSSProperties }) => (
   <div className="pointer-events-none absolute text-primary text-xl" style={style}>
@@ -9,8 +9,10 @@ const Snowflake = ({ style }: { style: React.CSSProperties }) => (
 );
 
 export function SnowflakeBackground() {
-  const snowflakes = React.useMemo(() => {
-    return Array.from({ length: 50 }).map((_, i) => {
+  const [snowflakes, setSnowflakes] = useState<JSX.Element[]>([]);
+
+  useEffect(() => {
+    const generatedSnowflakes = Array.from({ length: 50 }).map((_, i) => {
       const style = {
         left: `${Math.random() * 100}%`,
         animation: `fall ${Math.random() * 10 + 5}s linear infinite`,
@@ -20,6 +22,7 @@ export function SnowflakeBackground() {
       };
       return <Snowflake key={i} style={style} />;
     });
+    setSnowflakes(generatedSnowflakes);
   }, []);
 
   return (
