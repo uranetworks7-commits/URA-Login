@@ -12,6 +12,7 @@ import { SignupForm } from '@/components/auth/signup-form';
 import { BannedScreen } from '@/components/auth/banned-screen';
 import { BackgroundImage } from '@/components/auth/background-image';
 import { SecurityCheckScreen } from '@/components/auth/security-check-screen';
+import { LoginSuccessDialog } from '@/components/auth/login-success-dialog';
 
 type AppState = 'loading' | 'auth' | 'security_check' | 'banned' | 'loggedIn';
 type AuthMode = 'login' | 'signup';
@@ -39,6 +40,7 @@ export default function Home() {
   const [loggedInUser, setLoggedInUser] = useState<UserData | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -57,6 +59,7 @@ export default function Home() {
         setAppState('banned');
         localStorage.setItem("failedKey", "true");
         window.parent.postMessage({ type: "ban" }, "*");
+        alert("🚫 Your account is banned!");
     }
   };
   
@@ -64,7 +67,6 @@ export default function Home() {
     if (result.success && result.data) {
       const user = result.data as UserData;
       setLoggedInUser(user);
-      setAppState('loggedIn');
       
       localStorage.setItem("username", user.username);
       localStorage.setItem("api", user.email);
@@ -74,6 +76,8 @@ export default function Home() {
         username: user.username,
         api: user.email 
       }, "*");
+      
+      setShowSuccessPopup(true);
 
     } else if (result.status === 'banned' && result.data) {
         localStorage.setItem("failedKey", "true");
@@ -81,6 +85,7 @@ export default function Home() {
         setBanDetails(result.data as BannedDetails);
         setAppState('banned');
         window.parent.postMessage({ type: "ban" }, "*");
+        alert("🚫 Your account is banned!");
     }
   };
 
@@ -126,7 +131,24 @@ export default function Home() {
        case 'security_check':
         return userForSecurityCheck && <SecurityCheckScreen user={userForSecurityCheck} onResult={handleSecurityCheckResult} />;
       case 'banned':
-        return banDetails && <BannedScreen details={banDetails} />;
+         // When banned, we show an alert and stay on the auth screen.
+         // You might want to show the login form again.
+         // Or, if you have a specific banned component, you could transition to it.
+         // For now, we'll just fall back to the auth state.
+         if (authMode !== 'login') setAuthMode('login');
+         if (isFlipped) setIsFlipped(false);
+         return (
+          <div className="flex min-h-screen items-center justify-center p-4 [perspective:1000px]">
+             <div className={cn('relative w-full max-w-sm transition-transform duration-700 [transform-style:preserve-3d]', { '[transform:rotateY(180deg)]': isFlipped })}>
+                <div className="absolute w-full [backface-visibility:hidden]">
+                    <LoginForm onSignupClick={toggleAuthMode} onLoginResult={handleLoginResult} />
+                </div>
+                <div className="absolute w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                    <SignupForm onLoginClick={toggleAuthMode} />
+                </div>
+            </div>
+          </div>
+        );
       case 'loggedIn':
         return loggedInUser && <LoggedInScreen user={loggedInUser} onLogout={handleLogout} />;
       default:
@@ -141,6 +163,13 @@ export default function Home() {
       <div className="relative z-10 w-full">
         <CurrentScreen />
       </div>
+       <LoginSuccessDialog
+        open={showSuccessPopup}
+        onOpenChange={setShowSuccessPopup}
+        onOpenApp={() => {
+          window.location.href = 'main.html';
+        }}
+      />
     </main>
   );
 }
