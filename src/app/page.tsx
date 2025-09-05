@@ -64,12 +64,12 @@ export default function Home() {
   };
 
   const handleLoginResult = (result: LoginResult) => {
-    if (result.success && result.data) {
-      setLoggedInUser(result.data as UserData);
-      setAppState('loggedIn');
+    if (result.success) {
+        setLoggedInUser(result.data as UserData);
+        setAppState('loggedIn');
     } else if (result.status === 'banned' && result.data) {
-      setBanDetails(result.data as BannedDetails);
-      setAppState('banned');
+        setBanDetails(result.data as BannedDetails);
+        setAppState('banned');
     }
   };
   
