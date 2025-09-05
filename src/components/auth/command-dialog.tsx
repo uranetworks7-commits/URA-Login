@@ -184,16 +184,13 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle }: Comman
                 className="bg-black/30 border-primary/20 focus:ring-primary/80 pl-[100px] font-mono"
             />
           </div>
-          <Button type="submit" onClick={handleCommand} variant="outline" className="bg-primary/80 hover:bg-primary border-0">
-            Execute
+           <Button type="button" onClick={handleReset} variant="secondary" size="icon">
+            <RefreshCcw className="h-4 w-4"/>
+            <span className="sr-only">Reset</span>
           </Button>
-           <Button type="button" onClick={handleReset} variant="secondary">
-            <RefreshCcw className="mr-2 h-4 w-4"/>
-            Reset
-          </Button>
-           <Button type="button" onClick={() => onOpenChange(false)} variant="destructive">
-            <PowerOff className="mr-2 h-4 w-4"/>
-            Close
+           <Button type="button" onClick={() => onOpenChange(false)} variant="destructive" size="icon">
+            <PowerOff className="h-4 w-4"/>
+             <span className="sr-only">Close</span>
           </Button>
         </div>
       </DialogContent>
