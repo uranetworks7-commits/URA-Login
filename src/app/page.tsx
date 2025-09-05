@@ -11,8 +11,9 @@ import { LoginForm } from '@/components/auth/login-form';
 import { SignupForm } from '@/components/auth/signup-form';
 import { BackgroundImage } from '@/components/auth/background-image';
 import { LoginSuccessDialog } from '@/components/auth/login-success-dialog';
+import { BannedScreen } from '@/components/auth/banned-screen';
 
-type AppState = 'loading' | 'auth' | 'loggedIn';
+type AppState = 'loading' | 'auth' | 'loggedIn' | 'banned';
 type AuthMode = 'login' | 'signup';
 
 const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => (
@@ -34,6 +35,7 @@ export default function Home() {
   const [appState, setAppState] = useState<AppState>('loading');
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [loggedInUser, setLoggedInUser] = useState<UserData | null>(null);
+  const [bannedDetails, setBannedDetails] = useState<BannedDetails | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -50,18 +52,12 @@ export default function Home() {
     if (result.success && result.data && result.status === 'approved') {
         const user = result.data as UserData;
         setLoggedInUser(user);
-
-        localStorage.setItem("username", user.username);
-        localStorage.setItem("api", user.email);
-        localStorage.setItem("successKey", "true");
+        setShowSuccessPopup(true);
         window.parent.postMessage({ 
           type: "loginSuccess", 
           username: user.username,
           api: user.email 
         }, "*");
-      
-        setShowSuccessPopup(true);
-
     } else if (result.status === 'banned' && result.data) {
         localStorage.setItem("failedKey", "true");
         window.parent.postMessage({ type: "ban" }, "*");
@@ -75,6 +71,7 @@ export default function Home() {
     localStorage.removeItem('api');
     localStorage.removeItem('failedKey');
     setLoggedInUser(null);
+    setBannedDetails(null);
     setAppState('auth');
     setAuthMode('login');
     setIsFlipped(false);
@@ -109,6 +106,8 @@ export default function Home() {
         );
       case 'loggedIn':
         return loggedInUser && <LoggedInScreen user={loggedInUser} onLogout={handleLogout} />;
+      case 'banned':
+        return bannedDetails && <BannedScreen details={bannedDetails} />;
       default:
         return null;
     }
@@ -125,7 +124,7 @@ export default function Home() {
         open={showSuccessPopup}
         onOpenChange={setShowSuccessPopup}
         onOpenApp={() => {
-          window.location.href = 'main.html';
+          window.location.href = 'file:///android_asset/htmlapp/root/main.html';
         }}
       />
     </main>
