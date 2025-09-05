@@ -40,11 +40,9 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
 
     const timer = setInterval(() => {
       const newTimeLeft = calculateTimeLeft(unbanAt);
-      if (newTimeLeft) {
-        setTimeLeft(newTimeLeft);
-      } else {
+      setTimeLeft(newTimeLeft);
+      if (!newTimeLeft) {
         clearInterval(timer);
-        setTimeLeft(null);
       }
     }, 1000);
 
@@ -56,6 +54,7 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
   };
 
   const isPermanent = banDuration === 'Permanent';
+  const banExpired = unbanAt && !timeLeft;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -78,7 +77,7 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
             </p>
           </div>
 
-          {timeLeft && unbanAt && !isPermanent && (
+          {timeLeft && !isPermanent && (
             <div className="space-y-2 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-4">
               <h3 className="flex items-center justify-center gap-2 font-semibold text-yellow-600 dark:text-yellow-400">
                 <Timer className="h-5 w-5" />
@@ -94,7 +93,7 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
             </div>
           )}
           
-          {!timeLeft && !isPermanent && unbanAt && (
+          {banExpired && !isPermanent && (
              <div className="space-y-4">
                 <p className="text-green-600 dark:text-green-400">Your ban duration is over.</p>
                 <Button onClick={handleRefresh}>Click here to Login</Button>
