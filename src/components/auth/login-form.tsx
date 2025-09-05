@@ -260,39 +260,37 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                     Google
                 </Button>
             </div>
-            <div className="relative flex items-center justify-center py-2">
-                <div className="flex-grow border-t border-white/20"></div>
-                <div className="flex-shrink-0 flex items-center gap-4 mx-4">
-                     <FormField
-                        control={form.control}
-                        name="terms"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                            </FormControl>
-                            <FormLabel className="font-normal text-white/80 text-sm -translate-y-px">
-                                Accept <TermsDialog />
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="bg-transparent border-none hover:bg-white/10 rounded-full h-8 w-8">
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-black/80 text-white border-white/20">
-                            <DropdownMenuItem onClick={() => router.push('/signup-ura')} className="cursor-pointer hover:bg-primary/20">
-                                <UraIcon className="mr-2 h-4 w-4 text-primary" />
-                                <span>Login with URA</span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-                <div className="flex-grow border-t border-white/20"></div>
+            
+            <div className="relative flex items-center justify-between py-2">
+                 <FormField
+                    control={form.control}
+                    name="terms"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                        <FormLabel className="font-normal text-white/80 text-sm -translate-y-px">
+                            Accept <TermsDialog />
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="bg-transparent border-none hover:bg-white/10 rounded-full h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-black/80 text-white border-white/20">
+                        <DropdownMenuItem onClick={() => router.push('/signup-ura')} className="cursor-pointer hover:bg-primary/20">
+                            <UraIcon className="mr-2 h-4 w-4 text-primary" />
+                            <span>Login with URA</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
+
           </CardContent>
           <CardFooter className="flex flex-col gap-4 pt-2">
             <Button type="submit" className="w-full font-semibold" size="lg" disabled={isSubmitting}>
