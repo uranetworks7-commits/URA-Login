@@ -16,23 +16,26 @@ export function TermsDialog() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="link" className="p-0 h-auto -translate-y-px">
+        <Button variant="link" className="p-0 h-auto -translate-y-px text-primary hover:text-primary/80">
           Terms and Conditions
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>📘 Account Creation Rules</AlertDialogTitle>
+          <AlertDialogTitle>📘 Account Creation & Usage Rules</AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-4 pt-4 text-left text-foreground">
               <p>
-                <strong>1.</strong> Suggestion: Use lowercase for username and email for best results.
+                <strong>1. Account Request:</strong> Use lowercase for username and email for best results. Your request will be reviewed by an administrator, which may take 24-48 hours.
               </p>
               <p>
-                <strong>2.</strong> Once you submit your request, your account will be reviewed by an administrator. This may take 24-48 hours. Please be patient.
+                <strong>2. Fair Use Policy:</strong> We reserve the right to block or delete accounts associated with the creation of multiple fakes from a single entity.
+              </p>
+               <p>
+                <strong>3. Anti-Hacking Policy:</strong> Any attempt to hack, disrupt, or gain unauthorized access to this application or its services is strictly prohibited. We employ monitoring services, and any such activity will result in an immediate and permanent ban.
               </p>
               <p>
-                <strong>3.</strong> If we detect the creation of multiple fake accounts from a single entity, we reserve the right to block or delete all associated accounts.
+                <strong>4. Rights Reserved:</strong> All rights related to this application, its content, and services are reserved by VLF-TeC. Unauthorized use, reproduction, or distribution is not permitted.
               </p>
             </div>
           </AlertDialogDescription>

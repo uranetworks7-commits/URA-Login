@@ -260,42 +260,41 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                     Google
                 </Button>
             </div>
-            <div className="relative flex items-center justify-center">
-                <div className="absolute left-0">
+            <div className="relative flex items-center justify-center py-2">
+                <div className="flex-grow border-t border-white/20"></div>
+                <div className="flex-shrink-0 flex items-center gap-4 mx-4">
                      <FormField
                         control={form.control}
                         name="terms"
                         render={({ field }) => (
-                          <FormItem className="flex flex-row items-center space-x-3 space-y-0 p-3">
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                             <FormControl>
                               <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
-                            <div className="space-y-1 leading-none">
-                              <FormLabel className="font-normal text-white/80 text-sm">
+                            <FormLabel className="font-normal text-white/80 text-sm -translate-y-px">
                                 Accept <TermsDialog />
-                              </FormLabel>
-                            </div>
+                            </FormLabel>
                           </FormItem>
                         )}
                       />
+                     <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="bg-transparent border-none hover:bg-white/10 rounded-full h-8 w-8">
+                                <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-black/80 text-white border-white/20">
+                            <DropdownMenuItem onClick={() => router.push('/signup-ura')} className="cursor-pointer hover:bg-primary/20">
+                                <UraIcon className="mr-2 h-4 w-4 text-primary" />
+                                <span>Login with URA</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
-                <Separator className="w-full bg-white/20" />
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="absolute bg-black/50 border-white/20 hover:bg-black/30 rounded-full">
-                            <MoreVertical className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="center" className="bg-black/80 text-white border-white/20">
-                        <DropdownMenuItem onClick={() => router.push('/signup-ura')} className="cursor-pointer hover:bg-primary/20">
-                            <UraIcon className="mr-2 h-4 w-4 text-primary" />
-                            <span>Login with URA</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex-grow border-t border-white/20"></div>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4 pt-4">
+          <CardFooter className="flex flex-col gap-4 pt-2">
             <Button type="submit" className="w-full font-semibold" size="lg" disabled={isSubmitting}>
               {isSubmitting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
