@@ -111,8 +111,8 @@ export default function Home() {
         return <LoadingScreen onComplete={handleLoadingComplete} />;
       case 'auth':
         return (
-          <div className="flex min-h-screen items-start justify-center p-4 pt-32 [perspective:1000px]">
-             <div className={cn('relative w-full max-w-sm transition-transform duration-700 [transform-style:preserve-3d]', { '[transform:rotateY(180deg)]': isFlipped })}>
+          <div className="flex min-h-screen items-start justify-center p-4 pt-24 [perspective:1000px]">
+             <div className={cn('relative w-full max-w-md transition-transform duration-700 [transform-style:preserve-3d]', { '[transform:rotateY(180deg)]': isFlipped })}>
                 <div className="absolute w-full [backface-visibility:hidden]">
                     <LoginForm onSignupClick={toggleAuthMode} onLoginResult={handleLoginResult} />
                 </div>

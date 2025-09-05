@@ -82,14 +82,14 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-sm bg-black/60 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/40">
+    <Card className="w-full max-w-md bg-black/70 text-white border-white/20 backdrop-blur-xl shadow-2xl shadow-black/50">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardHeader>
-            <CardTitle className="text-2xl text-primary">Login</CardTitle>
-            <CardDescription className="text-white/70">Suggestion: Use lowercase for username and email for best results.</CardDescription>
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl text-primary font-bold">Login</CardTitle>
+            <CardDescription className="text-white/70 pt-2">Enter your credentials to access your account.</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4">
+          <CardContent className="grid gap-6">
             <FormField
               control={form.control}
               name="username"
@@ -97,7 +97,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="your_username" {...field} className="bg-white/10 border-white/20 focus:bg-white/20" />
+                    <Input placeholder="your_username" {...field} className="bg-black/40 border-white/30 focus:bg-black/50 focus:ring-primary/80" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -110,15 +110,15 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="m@example.com" {...field} className="bg-white/10 border-white/20 focus:bg-white/20" />
+                    <Input type="email" placeholder="m@example.com" {...field} className="bg-black/40 border-white/30 focus:bg-black/50 focus:ring-primary/80" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <CardFooter className="flex flex-col gap-4 pt-4">
+            <Button type="submit" className="w-full font-semibold" size="lg" disabled={isSubmitting}>
               {isSubmitting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -127,7 +127,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
               Login
             </Button>
             <Button variant="link" type="button" onClick={onSignupClick} className="text-white/80 hover:text-white">
-              Haven't an account? Create one
+              Don't have an account? Sign Up
             </Button>
           </CardFooter>
         </form>
