@@ -81,7 +81,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-sm bg-black/20 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/40">
+    <Card className="w-full max-w-sm bg-black/60 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/40">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader>
