@@ -129,8 +129,7 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
                 unbanTimestamp = new Date(userData.unbanAt).getTime();
                 if (Date.now() > unbanTimestamp) {
                     await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
-                    // Re-call login to attempt security check after unban
-                    return loginUser(credentials);
+                     return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
                 }
             }
             return { success: false, message: 'Your account is banned.', status: 'banned', data: { banReason: userData.banReason, banDuration: userData.banDuration, unbanAt: unbanTimestamp } };
@@ -142,5 +141,3 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
             return { success: false, message: 'Unknown account status. Please contact support.', status: 'error' };
     }
 }
-
-export { securitySystemCheck };

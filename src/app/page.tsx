@@ -3,7 +3,7 @@
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { loginUser, securitySystemCheck, type LoginResult, type UserData, type BannedDetails } from '@/app/actions';
+import { loginUser, type LoginResult, type UserData, type BannedDetails } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/auth/loading-screen';
@@ -52,13 +52,14 @@ export default function Home() {
     const email = localStorage.getItem('api');
 
     if (appState === 'loading' && successKey === 'true' && username && email) {
-      setLoggedInUser({ username, email });
+      setUserForSecurityCheck({ username, email });
+      setAppState('security_check');
     }
   }, [appState, isClient]);
 
   const handleLoadingComplete = () => {
-    if (loggedInUser) {
-      setAppState('loggedIn');
+    if (userForSecurityCheck) {
+       setAppState('security_check');
     } else {
       setAppState('auth');
     }
@@ -66,6 +67,7 @@ export default function Home() {
 
   const handleLoginResult = (result: LoginResult) => {
     if (result.success && result.data && result.status === 'approved') {
+        localStorage.setItem("successKey", "true");
         setUserForSecurityCheck(result.data as UserData);
         setAppState('security_check');
     } else if (result.status === 'banned' && result.data) {
@@ -77,10 +79,10 @@ export default function Home() {
   const handleSecurityCheckResult = (result: LoginResult) => {
     if (result.success && result.data) {
       setLoggedInUser(result.data as UserData);
-      localStorage.setItem("successKey", "true");
       setAppState('loggedIn');
     } else if (result.status === 'banned' && result.data) {
         localStorage.setItem("failedKey", "true");
+        localStorage.removeItem('successKey');
         setBanDetails(result.data as BannedDetails);
         setAppState('banned');
     }
@@ -138,11 +140,11 @@ export default function Home() {
 
 
   return (
-    <div className="relative">
+    <main className="relative flex min-h-screen flex-col items-center justify-center">
       <BackgroundImage />
-      <div className="relative z-10">
+      <div className="relative z-10 w-full">
         <CurrentScreen />
       </div>
-    </div>
+    </main>
   );
 }
