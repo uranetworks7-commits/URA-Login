@@ -53,7 +53,6 @@ export function CommandDialog({ open, onOpenChange }: CommandDialogProps) {
   const fullCommandPrefix = "URA//APP//:";
 
   const handleCommand = () => {
-    const fullCommand = `${fullCommandPrefix}${command}`.trim();
     if (!command) return;
 
     setLogs(prev => [...prev, { type: 'command', text: command }]);
@@ -81,13 +80,6 @@ export function CommandDialog({ open, onOpenChange }: CommandDialogProps) {
     setCommand('');
   };
   
-  const showHelp = () => {
-      const helpText = availableCommands.map(cmd => 
-            `\n- ${cmd.command}: ${cmd.description}` + (cmd.colors ? `\n  ${cmd.colors}`: '')
-       ).join('');
-       setLogs(prev => [...prev, { type: 'help', text: `Available Commands:${helpText}` }]);
-  }
-
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleCommand();
@@ -138,7 +130,7 @@ export function CommandDialog({ open, onOpenChange }: CommandDialogProps) {
                  log.type === 'help' ? 'text-cyan-400' : 
                  'text-green-400'
                 }`}>
-                {log.type === 'command' && <ChevronRight className="h-4 w-4 mt-px shrink-0 text-primary/50" />}
+                {log.type === 'command' && <><span className="text-primary/70">{fullCommandPrefix}</span><ChevronRight className="h-4 w-4 mt-px shrink-0 text-primary/50" /></>}
                 {log.type === 'response' && <span className="shrink-0 text-green-400/50">✓</span>}
                 {log.type === 'error' && <span className="shrink-0 text-destructive/50">✗</span>}
                 {log.type === 'help' && <HelpCircle className="h-4 w-4 mt-px shrink-0 text-cyan-400/50" />}

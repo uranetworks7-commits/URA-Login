@@ -26,8 +26,8 @@ export function SettingsPopover({ onInternetAccessChange }: SettingsPopoverProps
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="w-full bg-black/20 border-white/20 hover:bg-black/30">
-                    <Settings className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="text-white/70 hover:text-white hover:bg-white/10">
+                    <Settings className="h-5 w-5" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 bg-black/70 text-white border-white/20 backdrop-blur-lg">
