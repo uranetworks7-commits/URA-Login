@@ -44,25 +44,8 @@ export default function Home() {
     setIsClient(true);
   }, []);
 
-  useEffect(() => {
-    if (!isClient) return;
-
-    const successKey = localStorage.getItem('successKey');
-    const username = localStorage.getItem('username');
-    const email = localStorage.getItem('api');
-
-    if (appState === 'loading' && successKey === 'true' && username && email) {
-      setUserForSecurityCheck({ username, email });
-      setAppState('security_check');
-    }
-  }, [appState, isClient]);
-
   const handleLoadingComplete = () => {
-    if (userForSecurityCheck) {
-       setAppState('security_check');
-    } else {
-      setAppState('auth');
-    }
+    setAppState('auth');
   };
 
   const handleLoginResult = (result: LoginResult) => {
