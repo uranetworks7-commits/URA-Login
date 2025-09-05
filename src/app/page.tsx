@@ -3,7 +3,7 @@
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { loginUser, type LoginResult, type UserData, type BannedDetails } from '@/app/actions';
+import { type LoginResult, type UserData, type BannedDetails } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/auth/loading-screen';
@@ -67,7 +67,6 @@ export default function Home() {
 
   const handleLoginResult = (result: LoginResult) => {
     if (result.success && result.data && result.status === 'approved') {
-        localStorage.setItem("successKey", "true");
         setUserForSecurityCheck(result.data as UserData);
         setAppState('security_check');
     } else if (result.status === 'banned' && result.data) {

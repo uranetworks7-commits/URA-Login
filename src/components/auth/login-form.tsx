@@ -54,20 +54,19 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
     setIsSubmitting(true);
     try {
       const result = await loginUser(data);
-      if (result.success) {
+      if (result.success && result.status === 'approved') {
         localStorage.setItem("username", data.username);
         localStorage.setItem("api", data.email);
+        localStorage.setItem("successKey", "true");
         onLoginResult(result);
-      } else {
-        if (result.status === 'banned') {
+      } else if (result.status === 'banned') {
           onLoginResult(result);
-        } else {
-          toast({
-            variant: 'destructive',
-            title: 'Login Failed',
-            description: result.message,
-          });
-        }
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Login Failed',
+          description: result.message,
+        });
       }
     } catch (error) {
       console.error("Login submission error:", error);
