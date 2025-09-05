@@ -32,6 +32,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 interface LoginFormProps {
   onSignupClick: () => void;
   onLoginResult: (result: LoginResult) => void;
+  onHackEffectToggle: (isActive: boolean) => void;
 }
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -55,7 +56,7 @@ const UraIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 
-export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
+export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: LoginFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -238,10 +239,26 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                         </FormItem>
                       )}
                     />
-                    <Button variant="outline" onClick={() => setIsCmdOpen(true)} className="w-full bg-black/20 border-white/20 hover:bg-black/30">
-                        <Terminal className="mr-2 h-4 w-4" />
-                        CMD
-                    </Button>
+                    <div className="relative flex items-center justify-center pt-2">
+                        <Separator className="w-full bg-white/20" />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="icon" className="absolute bg-black/50 border-white/20 hover:bg-black/30 rounded-full">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="center" className="bg-black/80 text-white border-white/20">
+                                <DropdownMenuItem onClick={() => router.push('/signup-ura')} className="cursor-pointer hover:bg-primary/20">
+                                    <UraIcon className="mr-2 h-4 w-4 text-primary" />
+                                    <span>Login with URA</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setIsCmdOpen(true)} className="cursor-pointer hover:bg-primary/20">
+                                    <Terminal className="mr-2 h-4 w-4" />
+                                    <span>Open CMD</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
               </PopoverContent>
             </Popover>
@@ -254,22 +271,6 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                     <GoogleIcon className="mr-2 h-4 w-4" />
                     Google
                 </Button>
-            </div>
-             <div className="relative flex items-center justify-center">
-                <Separator className="w-full bg-white/20" />
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="absolute bg-black/50 border-white/20 hover:bg-black/30 rounded-full">
-                            <MoreVertical className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="center" className="bg-black/80 text-white border-white/20">
-                        <DropdownMenuItem onClick={() => router.push('/signup-ura')} className="cursor-pointer hover:bg-primary/20">
-                            <UraIcon className="mr-2 h-4 w-4 text-primary" />
-                            <span>Login with URA</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 pt-4">
@@ -289,7 +290,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
         </form>
       </Form>
     </Card>
-    <CommandDialog open={isCmdOpen} onOpenChange={setIsCmdOpen} />
+    <CommandDialog open={isCmdOpen} onOpenChange={setIsCmdOpen} onHackEffectToggle={onHackEffectToggle} />
     </>
   );
 }

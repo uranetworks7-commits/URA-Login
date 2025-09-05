@@ -49,6 +49,8 @@ export default function Home() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [quickLoginUser, setQuickLoginUser] = useState<UserData | null>(null);
   const [autoOpen, setAutoOpen] = useState(false);
+  const [isHackEffectActive, setIsHackEffectActive] = useState(false);
+
 
   useEffect(() => {
     setIsClient(true);
@@ -147,7 +149,7 @@ export default function Home() {
           <div className="flex min-h-screen items-start justify-center p-4 pt-24 [perspective:1000px]">
              <div className={cn('relative w-full max-w-lg transition-transform duration-700 [transform-style:preserve-3d]', { '[transform:rotateY(180deg)]': isFlipped })}>
                 <div className="absolute w-full [backface-visibility:hidden]">
-                    <LoginForm onSignupClick={toggleAuthMode} onLoginResult={handleLoginResult} />
+                    <LoginForm onSignupClick={toggleAuthMode} onLoginResult={handleLoginResult} onHackEffectToggle={setIsHackEffectActive} />
                 </div>
                 <div className="absolute w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
                     <SignupForm onLoginClick={toggleAuthMode} />
@@ -173,7 +175,7 @@ export default function Home() {
 
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center">
+    <main className={cn("relative flex min-h-screen flex-col items-center justify-center", { 'hack-effect': isHackEffectActive })}>
       <BackgroundImage />
       <div className="relative z-10 w-full">
         <CurrentScreen />

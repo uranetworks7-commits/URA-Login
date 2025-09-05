@@ -86,3 +86,44 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.hack-effect {
+  filter: 
+    brightness(1.1) 
+    contrast(1.3) 
+    hue-rotate(120deg) 
+    saturate(2);
+  
+  animation: flicker 0.1s infinite;
+}
+
+@keyframes flicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.95; }
+  100% { opacity: 1; }
+}
+
+.hack-effect::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            rgba(0, 255, 0, 0.1),
+            rgba(0, 255, 0, 0.1) 1px,
+            transparent 1px,
+            transparent 2px
+        );
+    pointer-events: none;
+    z-index: 9999;
+    animation: scanlines 2s linear infinite;
+}
+
+@keyframes scanlines {
+  from { transform: translateY(-10px); }
+  to { transform: translateY(10px); }
+}

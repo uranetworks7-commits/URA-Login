@@ -4,21 +4,22 @@ import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Terminal, ChevronRight, Save, HelpCircle } from 'lucide-react';
+import { Terminal, ChevronRight, Save, HelpCircle, RefreshCcw, PowerOff } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface CommandDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onHackEffectToggle: (isActive: boolean) => void;
 }
 
 interface LogEntry {
-  type: 'command' | 'response' | 'error' | 'help';
+  type: 'command' | 'response' | 'error' | 'help' | 'special';
   text: string;
 }
 
-// Map color names to HSL values for the theme
 const colorMap: { [key: string]: string } = {
     blue: '221.2 83.2% 53.3%',
     green: '142.1 76.2% 36.3%',
@@ -26,27 +27,32 @@ const colorMap: { [key: string]: string } = {
     purple: '262.1 83.3% 57.8%',
     orange: '24.6 95% 53.1%',
     yellow: '47.9 95.8% 53.1%',
-    default: '262.1 83.3% 57.8%', // Default primary color
+    default: '262.1 83.3% 57.8%',
 };
+const colorCycle = Object.keys(colorMap).filter(c => c !== 'default');
 
 const availableCommands = [
-    {
-        command: 'change color <color>',
-        description: 'Changes the primary UI color.',
-        colors: `Available: ${Object.keys(colorMap).join(', ')}`,
-    },
-    {
-        command: 'help',
-        description: 'Displays this list of available commands.'
-    }
+    { command: 'help', description: 'Displays this list of available commands.' },
+    { command: 'swapcolor', description: 'Cycles through available UI colors.' },
+    { command: 'hackeffect', description: 'Toggles a visual hacking effect on the screen.' },
+    { command: 'showhidecommand', description: 'Reveals hidden special commands.' },
+];
+
+const specialCommands = [
+     { command: 'matrix', description: 'Initiates matrix rain effect (not implemented).'},
+     { command: 'godmode', description: 'Unlocks all features (not implemented).'},
 ]
 
-export function CommandDialog({ open, onOpenChange }: CommandDialogProps) {
+
+export function CommandDialog({ open, onOpenChange, onHackEffectToggle }: CommandDialogProps) {
   const { toast } = useToast();
   const [command, setCommand] = useState('');
   const [logs, setLogs] = useState<LogEntry[]>([
       {type: 'response', text: 'URA Command Interface. Type "help" for assistance.'}
   ]);
+  const [colorIndex, setColorIndex] = useState(0);
+  const originalPrimaryColor = useRef<string | null>(null);
+  
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -56,25 +62,41 @@ export function CommandDialog({ open, onOpenChange }: CommandDialogProps) {
     if (!command) return;
 
     setLogs(prev => [...prev, { type: 'command', text: command }]);
+    const action = command.trim().toLowerCase();
 
-    const parts = command.trim().toLowerCase().split(' ');
-    const action = parts[0];
-
-    if (action === 'change' && parts[1] === 'color' && parts[2]) {
-      const color = parts[2];
-      if (colorMap[color]) {
-        document.documentElement.style.setProperty('--primary', colorMap[color]);
-        setLogs(prev => [...prev, { type: 'response', text: `UI primary color changed to ${color}.` }]);
-      } else {
-        setLogs(prev => [...prev, { type: 'error', text: `Error: Color "${color}" not recognized. Type 'help' to see available colors.` }]);
-      }
-    } else if (action === 'help') {
-       const helpText = availableCommands.map(cmd => 
-            `\n- ${cmd.command}: ${cmd.description}` + (cmd.colors ? `\n  ${cmd.colors}`: '')
-       ).join('');
-       setLogs(prev => [...prev, { type: 'help', text: `Available Commands:${helpText}` }]);
-    } else {
-      setLogs(prev => [...prev, { type: 'error', text: `Error: Unknown command "${command}". Type 'help' for a list of commands.` }]);
+    switch(action) {
+        case 'help': {
+            const helpText = availableCommands.map(cmd => 
+                `\n- ${cmd.command}: ${cmd.description}`
+            ).join('');
+            setLogs(prev => [...prev, { type: 'help', text: `Available Commands:${helpText}` }]);
+            break;
+        }
+        case 'swapcolor': {
+            const nextColorIndex = (colorIndex + 1) % colorCycle.length;
+            const nextColorName = colorCycle[nextColorIndex];
+            document.documentElement.style.setProperty('--primary', colorMap[nextColorName]);
+            setLogs(prev => [...prev, { type: 'response', text: `UI primary color changed to ${nextColorName}.` }]);
+            setColorIndex(nextColorIndex);
+            break;
+        }
+        case 'hackeffect': {
+            onHackEffectToggle(prev => {
+                setLogs(prevLogs => [...prevLogs, { type: 'response', text: `Hack effect ${!prev ? 'activated' : 'deactivated'}.` }]);
+                return !prev;
+            });
+            break;
+        }
+        case 'showhidecommand': {
+             const specialText = specialCommands.map(cmd => 
+                `\n- ${cmd.command}: ${cmd.description}`
+             ).join('');
+             setLogs(prev => [...prev, { type: 'special', text: `Hidden Commands Unlocked:${specialText}` }]);
+             break;
+        }
+        default: {
+             setLogs(prev => [...prev, { type: 'error', text: `Error: Unknown command "${command}". Type 'help' for a list of commands.` }]);
+        }
     }
 
     setCommand('');
@@ -86,20 +108,28 @@ export function CommandDialog({ open, onOpenChange }: CommandDialogProps) {
     }
   }
 
-  const handleSaveAndRestart = () => {
+  const handleReset = () => {
+      if (originalPrimaryColor.current) {
+        document.documentElement.style.setProperty('--primary', originalPrimaryColor.current);
+      }
+      onHackEffectToggle(false);
+      setLogs([{type: 'response', text: 'UI has been reset to default state.'}]);
       toast({
-          title: 'Settings Saved!',
-          description: 'Restarting interface...'
+          title: 'UI Reset',
+          description: 'All CMD modifications have been reverted.'
       })
-      onOpenChange(false);
   }
   
   useEffect(() => {
     if (open) {
-        // Focus input when dialog opens
+        if (!originalPrimaryColor.current) {
+            originalPrimaryColor.current = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+        }
         setTimeout(() => inputRef.current?.focus(), 100);
+    } else {
+        onHackEffectToggle(false); // Turn off effect when closing dialog
     }
-  }, [open]);
+  }, [open, onHackEffectToggle]);
   
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -124,16 +154,19 @@ export function CommandDialog({ open, onOpenChange }: CommandDialogProps) {
         </DialogHeader>
         <ScrollArea ref={scrollAreaRef} className="flex-1 w-full bg-black/50 rounded-md p-4 font-mono text-sm border border-primary/20">
            {logs.map((log, index) => (
-             <div key={index} className={`flex gap-2 items-start ${
-                 log.type === 'command' ? 'text-primary' : 
-                 log.type === 'error' ? 'text-destructive' : 
-                 log.type === 'help' ? 'text-cyan-400' : 
-                 'text-green-400'
-                }`}>
+             <div key={index} className={cn('flex gap-2 items-start', {
+                 'text-primary': log.type === 'command',
+                 'text-destructive': log.type === 'error',
+                 'text-cyan-400': log.type === 'help',
+                 'text-yellow-400': log.type === 'special',
+                 'text-green-400': log.type === 'response'
+                })}>
                 {log.type === 'command' && <><span className="text-primary/70">{fullCommandPrefix}</span><ChevronRight className="h-4 w-4 mt-px shrink-0 text-primary/50" /></>}
                 {log.type === 'response' && <span className="shrink-0 text-green-400/50">✓</span>}
                 {log.type === 'error' && <span className="shrink-0 text-destructive/50">✗</span>}
                 {log.type === 'help' && <HelpCircle className="h-4 w-4 mt-px shrink-0 text-cyan-400/50" />}
+                {log.type === 'special' && <span className="shrink-0 text-yellow-400/50">⚡</span>}
+
                 <p className="flex-1 whitespace-pre-wrap break-words">{log.text}</p>
              </div>
            ))}
@@ -154,9 +187,13 @@ export function CommandDialog({ open, onOpenChange }: CommandDialogProps) {
           <Button type="submit" onClick={handleCommand} variant="outline" className="bg-primary/80 hover:bg-primary border-0">
             Execute
           </Button>
-           <Button type="button" onClick={handleSaveAndRestart} variant="secondary">
-            <Save className="mr-2 h-4 w-4"/>
-            Save & Restart
+           <Button type="button" onClick={handleReset} variant="secondary">
+            <RefreshCcw className="mr-2 h-4 w-4"/>
+            Reset
+          </Button>
+           <Button type="button" onClick={() => onOpenChange(false)} variant="destructive">
+            <PowerOff className="mr-2 h-4 w-4"/>
+            Close
           </Button>
         </div>
       </DialogContent>
