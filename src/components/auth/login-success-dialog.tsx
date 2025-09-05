@@ -8,7 +8,6 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
-  AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 
@@ -34,9 +33,7 @@ export function LoginSuccessDialog({ open, onOpenChange, onOpenApp }: LoginSucce
           <AlertDialogCancel asChild>
              <Button variant="outline" size="lg">Stay Here</Button>
           </AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Button size="lg" onClick={onOpenApp}>Open App</Button>
-          </AlertDialogAction>
+          <Button size="lg" onClick={onOpenApp}>Open App</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
