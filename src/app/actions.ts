@@ -4,7 +4,6 @@ import { initializeApp, getApp, type FirebaseApp } from 'firebase/app';
 import { getDatabase, ref, get, set, update } from 'firebase/database';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA9BC2mHNGY5cMaUvVrNp6e0mvXmmEuXfA",
   authDomain: "ura-backup-new1.firebaseapp.com",
   databaseURL: "https://ura-backup-new1-default-rtdb.firebaseio.com",
   projectId: "ura-backup-new1",
@@ -109,13 +108,20 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         
         default:
             // This handles the old ban status `3` with a potentially dynamic unbanAt for backward compatibility.
-            if (userData.unbanAt && userData.unbanAt !== 'Permanent') {
-                unbanTimestamp = new Date(userData.unbanAt).getTime();
-                if (Date.now() > unbanTimestamp) {
-                    await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
-                     return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
+            if (userData.unbanAt && userData.unbanAt !== 'Permanent' && userData.bannedAt) {
+                const banDurationMap: { [key: string]: number } = {
+                    '24 Hours': 24 * 60 * 60 * 1000,
+                    '7 Days': 7 * 24 * 60 * 60 * 1000,
+                };
+                const durationMs = banDurationMap[userData.banDuration];
+                if (durationMs) {
+                    unbanTimestamp = new Date(userData.bannedAt).getTime() + durationMs;
+                    if (Date.now() > unbanTimestamp) {
+                        await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
+                        return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
+                    }
+                    return { success: false, message: `Your account is temporarily banned.`, status: 'banned', data: { banReason: userData.banReason, banDuration: userData.banDuration, unbanAt: unbanTimestamp } };
                 }
-                 return { success: false, message: 'Your account is temporarily banned.', status: 'banned', data: { banReason: userData.banReason, banDuration: userData.banDuration, unbanAt: unbanTimestamp } };
             }
             return { success: false, message: 'Unknown account status. Please contact support.', status: 'error' };
     }
