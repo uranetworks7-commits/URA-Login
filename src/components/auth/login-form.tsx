@@ -55,18 +55,16 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
     try {
       const result = await loginUser(data);
       if (result.success && result.status === 'approved') {
-        localStorage.setItem("username", data.username);
-        localStorage.setItem("api", data.email);
-        localStorage.setItem("successKey", "true");
         onLoginResult(result);
-      } else if (result.status === 'banned') {
-          onLoginResult(result);
       } else {
-        toast({
-          variant: 'destructive',
-          title: 'Login Failed',
-          description: result.message,
-        });
+        onLoginResult(result);
+        if (result.status !== 'banned') {
+            toast({
+              variant: 'destructive',
+              title: 'Login Failed',
+              description: result.message,
+            });
+        }
       }
     } catch (error) {
       console.error("Login submission error:", error);

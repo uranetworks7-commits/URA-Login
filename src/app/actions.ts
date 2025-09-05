@@ -2,7 +2,6 @@
 
 import { initializeApp, getApp, type FirebaseApp } from 'firebase/app';
 import { getDatabase, ref, get, set, update } from 'firebase/database';
-import { securitySystemCheck } from '@/ai/flows/security-system-for-account-bans';
 
 const firebaseConfig = {
   apiKey: "AIzaSyA9BC2mHNGY5cMaUvVrNp6e0mvXmmEuXfA",
@@ -61,48 +60,6 @@ export async function createAccountRequest(data: UserData): Promise<{ success: b
         return { success: false, message: 'Server error. Please try again later.' };
     }
 }
-
-export async function runSecurityCheckAndLogin(user: UserData, activity: string): Promise<LoginResult> {
-    try {
-        const result = await securitySystemCheck({
-            username: user.username,
-            email: user.email,
-            activityLog: activity,
-        });
-
-        if (result.isBanned) {
-            let unbanAt;
-            if (result.banDuration && result.banDuration.includes('hour')) {
-                const hours = parseInt(result.banDuration, 10);
-                unbanAt = Date.now() + hours * 60 * 60 * 1000;
-            } else if (result.banDuration && result.banDuration.includes('day')) {
-                const days = parseInt(result.banDuration, 10);
-                unbanAt = Date.now() + days * 24 * 60 * 60 * 1000;
-            }
-
-            const banInfo = {
-                status: 3, // Banned
-                banReason: result.banReason || 'No reason specified.',
-                banDuration: result.banDuration || 'Permanent',
-                bannedAt: new Date().toISOString(),
-                unbanAt: unbanAt ? new Date(unbanAt).toISOString() : 'Permanent',
-            };
-            await update(ref(db, `users/${user.username.toLowerCase()}`), banInfo);
-            
-            return {
-                success: false,
-                message: result.banReason || 'Your account has been banned due to suspicious activity.',
-                status: 'banned',
-                data: { ...result, unbanAt },
-            };
-        }
-        return { success: true, message: 'Login successful!', status: 'approved', data: user };
-    } catch (error) {
-        console.error("Security check failed:", error);
-        return { success: false, message: 'Could not complete security check.', status: 'error' };
-    }
-}
-
 
 export async function loginUser(credentials: UserData): Promise<LoginResult> {
     const { username, email } = credentials;

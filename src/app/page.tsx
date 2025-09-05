@@ -9,12 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/auth/loading-screen';
 import { LoginForm } from '@/components/auth/login-form';
 import { SignupForm } from '@/components/auth/signup-form';
-import { BannedScreen } from '@/components/auth/banned-screen';
 import { BackgroundImage } from '@/components/auth/background-image';
-import { SecurityCheckScreen } from '@/components/auth/security-check-screen';
 import { LoginSuccessDialog } from '@/components/auth/login-success-dialog';
 
-type AppState = 'loading' | 'auth' | 'security_check' | 'banned' | 'loggedIn';
+type AppState = 'loading' | 'auth' | 'loggedIn';
 type AuthMode = 'login' | 'signup';
 
 const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => (
@@ -35,8 +33,6 @@ const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, on
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('loading');
   const [authMode, setAuthMode] = useState<AuthMode>('login');
-  const [banDetails, setBanDetails] = useState<BannedDetails | null>(null);
-  const [userForSecurityCheck, setUserForSecurityCheck] = useState<UserData | null>(null);
   const [loggedInUser, setLoggedInUser] = useState<UserData | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -52,50 +48,33 @@ export default function Home() {
 
   const handleLoginResult = (result: LoginResult) => {
     if (result.success && result.data && result.status === 'approved') {
-        setUserForSecurityCheck(result.data as UserData);
-        setAppState('security_check');
+        const user = result.data as UserData;
+        setLoggedInUser(user);
+
+        localStorage.setItem("username", user.username);
+        localStorage.setItem("api", user.email);
+        localStorage.setItem("successKey", "true");
+        window.parent.postMessage({ 
+          type: "loginSuccess", 
+          username: user.username,
+          api: user.email 
+        }, "*");
+      
+        setShowSuccessPopup(true);
+
     } else if (result.status === 'banned' && result.data) {
-        setBanDetails(result.data as BannedDetails);
-        setAppState('banned');
         localStorage.setItem("failedKey", "true");
         window.parent.postMessage({ type: "ban" }, "*");
         alert("🚫 Your account is banned!");
     }
   };
   
-  const handleSecurityCheckResult = (result: LoginResult) => {
-    if (result.success && result.data) {
-      const user = result.data as UserData;
-      setLoggedInUser(user);
-      
-      localStorage.setItem("username", user.username);
-      localStorage.setItem("api", user.email);
-      localStorage.setItem("successKey", "true");
-      window.parent.postMessage({ 
-        type: "loginSuccess", 
-        username: user.username,
-        api: user.email 
-      }, "*");
-      
-      setShowSuccessPopup(true);
-
-    } else if (result.status === 'banned' && result.data) {
-        localStorage.setItem("failedKey", "true");
-        localStorage.removeItem('successKey');
-        setBanDetails(result.data as BannedDetails);
-        setAppState('banned');
-        window.parent.postMessage({ type: "ban" }, "*");
-        alert("🚫 Your account is banned!");
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('successKey');
     localStorage.removeItem('username');
     localStorage.removeItem('api');
     localStorage.removeItem('failedKey');
     setLoggedInUser(null);
-    setUserForSecurityCheck(null);
     setAppState('auth');
     setAuthMode('login');
     setIsFlipped(false);
@@ -117,27 +96,6 @@ export default function Home() {
         return <LoadingScreen onComplete={handleLoadingComplete} />;
       case 'auth':
         return (
-          <div className="flex min-h-screen items-center justify-center p-4 [perspective:1000px]">
-             <div className={cn('relative w-full max-w-sm transition-transform duration-700 [transform-style:preserve-3d]', { '[transform:rotateY(180deg)]': isFlipped })}>
-                <div className="absolute w-full [backface-visibility:hidden]">
-                    <LoginForm onSignupClick={toggleAuthMode} onLoginResult={handleLoginResult} />
-                </div>
-                <div className="absolute w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                    <SignupForm onLoginClick={toggleAuthMode} />
-                </div>
-            </div>
-          </div>
-        );
-       case 'security_check':
-        return userForSecurityCheck && <SecurityCheckScreen user={userForSecurityCheck} onResult={handleSecurityCheckResult} />;
-      case 'banned':
-         // When banned, we show an alert and stay on the auth screen.
-         // You might want to show the login form again.
-         // Or, if you have a specific banned component, you could transition to it.
-         // For now, we'll just fall back to the auth state.
-         if (authMode !== 'login') setAuthMode('login');
-         if (isFlipped) setIsFlipped(false);
-         return (
           <div className="flex min-h-screen items-center justify-center p-4 [perspective:1000px]">
              <div className={cn('relative w-full max-w-sm transition-transform duration-700 [transform-style:preserve-3d]', { '[transform:rotateY(180deg)]': isFlipped })}>
                 <div className="absolute w-full [backface-visibility:hidden]">
