@@ -7,7 +7,6 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 
@@ -15,9 +14,10 @@ interface LoginSuccessDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpenApp: () => void;
+  onCancel: () => void;
 }
 
-export function LoginSuccessDialog({ open, onOpenChange, onOpenApp }: LoginSuccessDialogProps) {
+export function LoginSuccessDialog({ open, onOpenChange, onOpenApp, onCancel }: LoginSuccessDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="w-full max-w-md">
@@ -30,9 +30,7 @@ export function LoginSuccessDialog({ open, onOpenChange, onOpenApp }: LoginSucce
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="grid grid-cols-2 gap-4 pt-4">
-          <AlertDialogCancel asChild>
-             <Button variant="outline" size="lg">Stay Here</Button>
-          </AlertDialogCancel>
+           <Button variant="outline" size="lg" onClick={onCancel}>Stay Here</Button>
           <Button size="lg" onClick={onOpenApp}>Open App</Button>
         </AlertDialogFooter>
       </AlertDialogContent>

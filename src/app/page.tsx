@@ -105,7 +105,12 @@ export default function Home() {
           </div>
         );
       case 'loggedIn':
-        return loggedInUser && <LoggedInScreen user={loggedInUser} onLogout={handleLogout} />;
+        // When logged in, we stay on this screen, but the dialog will be controlled by `showSuccessPopup`
+        return (
+             <div className="flex min-h-screen items-center justify-center p-4">
+                {loggedInUser && <LoggedInScreen user={loggedInUser} onLogout={handleLogout} />}
+            </div>
+        );
       case 'banned':
         return bannedDetails && <BannedScreen details={bannedDetails} />;
       default:
@@ -118,13 +123,19 @@ export default function Home() {
     <main className="relative flex min-h-screen flex-col items-center justify-center">
       <BackgroundImage />
       <div className="relative z-10 w-full">
-        <CurrentScreen />
+        {showSuccessPopup ? null : <CurrentScreen />}
       </div>
        <LoginSuccessDialog
         open={showSuccessPopup}
         onOpenChange={setShowSuccessPopup}
         onOpenApp={() => {
+          setAppState('loggedIn');
+          setShowSuccessPopup(false);
           window.location.href = 'file:///android_asset/htmlapp/root/main.html';
+        }}
+        onCancel={() => {
+            setAppState('loggedIn');
+            setShowSuccessPopup(false);
         }}
       />
     </main>
