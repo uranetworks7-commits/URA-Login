@@ -18,7 +18,8 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
   const { username, banReason, banDuration } = details;
   const { toast } = useToast();
   const [isRequesting, setIsRequesting] = useState(false);
-  
+  const [requestStatus, setRequestStatus] = useState<{success: boolean; message: string; autoUnbanned?: boolean} | null>(null);
+
   const isPermanent = banDuration === 'Permanent';
 
   const handleUnbanRequest = async () => {
@@ -33,6 +34,7 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
     setIsRequesting(true);
     try {
       const result = await requestUnban(username);
+      setRequestStatus(result);
       if (result.success) {
         toast({
           title: 'Success',
@@ -56,6 +58,10 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
     }
   };
 
+  const handleGoToLogin = () => {
+    window.location.reload();
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-lg border-destructive bg-card/80 backdrop-blur-sm shadow-2xl shadow-destructive/20">
@@ -77,14 +83,25 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
             </p>
           </div>
 
-          {!isPermanent && (
+          {!isPermanent && !requestStatus?.autoUnbanned && (
             <div className="space-y-4 pt-2">
                  <p className="text-sm text-muted-foreground">
-                    If you believe this is a mistake, you can request a review.
+                    If you believe this is a mistake, or if your ban has expired, click here.
                 </p>
-                <Button onClick={handleUnbanRequest} disabled={isRequesting}>
-                  {isRequesting ? 'Submitting...' : 'Request Unban'}
+                <Button onClick={handleUnbanRequest} disabled={isRequesting || !!requestStatus?.success}>
+                  {isRequesting ? 'Submitting...' : (requestStatus?.success ? 'Request Submitted' : 'Request Unban')}
                 </Button>
+            </div>
+          )}
+
+          {requestStatus?.autoUnbanned && (
+            <div className="space-y-4 pt-2">
+              <p className="text-sm text-green-500 font-medium">
+                {requestStatus.message}
+              </p>
+              <Button onClick={handleGoToLogin}>
+                Go to Login
+              </Button>
             </div>
           )}
 

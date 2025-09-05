@@ -128,11 +128,35 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
     }
 }
 
-export async function requestUnban(username: string): Promise<{ success: boolean; message: string }> {
+export async function requestUnban(username: string): Promise<{ success: boolean; message: string; autoUnbanned?: boolean }> {
     if (!username) {
         return { success: false, message: 'Username is required.' };
     }
     const userRef = ref(db, `users/${username.toLowerCase()}`);
+    const snapshot = await get(userRef);
+
+    if (!snapshot.exists()) {
+        return { success: false, message: 'User not found.' };
+    }
+
+    const userData = snapshot.val();
+    const isTempBanned = (userData.status === 4 || userData.status === 5) && userData.bannedAt;
+    
+    if (isTempBanned) {
+        const banDuration = userData.status === 4 ? (24 * 60 * 60 * 1000) : (7 * 24 * 60 * 60 * 1000);
+        const unbanTimestamp = new Date(userData.bannedAt).getTime() + banDuration;
+
+        if (Date.now() > unbanTimestamp) {
+            try {
+                await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanRequest: null, unbanRequestAt: null });
+                return { success: true, message: 'Your account has been automatically unbanned. You can now log in.', autoUnbanned: true };
+            } catch (error) {
+                console.error('Auto unban error:', error);
+                return { success: false, message: 'Server error. Could not automatically unban your account.' };
+            }
+        }
+    }
+
     try {
         await update(userRef, {
             unbanRequest: true,
