@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, LogIn, Github, MoreVertical, Zap, BatteryCharging, Sparkles, Terminal } from 'lucide-react';
+import { Loader2, LogIn, Github, MoreVertical, Zap, BatteryCharging, Sparkles, Terminal, Settings } from 'lucide-react';
 import { loginUser, type LoginResult } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
 import { CommandDialog } from './command-dialog';
+import { SettingsPopover } from './settings-popover';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -59,7 +60,8 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCmdOpen, setIsCmdOpen] = useState(false);
-  
+  const [isInternetAllowed, setIsInternetAllowed] = useState(true);
+
   const [defaultValues, setDefaultValues] = useState({ username: '', email: '', rememberMe: false, autoOpener: false });
 
   useEffect(() => {
@@ -85,6 +87,15 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
 
 
   async function onSubmit(data: LoginFormValues) {
+    if (!isInternetAllowed) {
+        toast({
+            variant: 'destructive',
+            title: 'Network Error',
+            description: 'Internet access is disabled in settings.',
+        });
+        return;
+    }
+      
     setIsSubmitting(true);
     try {
       const result = await loginUser(data);
@@ -172,7 +183,8 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 </FormItem>
               )}
             />
-             <Popover>
+            <div className="grid grid-cols-2 gap-4">
+                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30">
                         <Sparkles className="mr-2 h-4 w-4" />
@@ -231,6 +243,8 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                     </div>
                   </PopoverContent>
                 </Popover>
+                 <SettingsPopover onInternetAccessChange={setIsInternetAllowed} />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => toast({ title: 'Please Create A GitHub Account' })}>
                 <Github className="mr-2 h-4 w-4" />
