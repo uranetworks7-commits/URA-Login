@@ -11,8 +11,9 @@ import { LoginForm } from '@/components/auth/login-form';
 import { SignupForm } from '@/components/auth/signup-form';
 import { BackgroundImage } from '@/components/auth/background-image';
 import { BannedScreen } from '@/components/auth/banned-screen';
+import { PermissionNotice } from '@/components/auth/permission-notice';
 
-type AppState = 'loading' | 'auth' | 'loggedIn' | 'banned';
+type AppState = 'permission' | 'loading' | 'auth' | 'loggedIn' | 'banned';
 type AuthMode = 'login' | 'signup';
 
 const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => {
@@ -47,7 +48,16 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
+    const noticeAgreed = localStorage.getItem('permissionNoticeAgreed');
+    if (!noticeAgreed) {
+        setAppState('permission');
+    }
   }, []);
+
+  const handlePermissionAgree = () => {
+    localStorage.setItem('permissionNoticeAgreed', 'true');
+    setAppState('loading');
+  }
 
   const handleLoadingComplete = () => {
     setAppState('auth');
@@ -92,9 +102,11 @@ export default function Home() {
   
   const CurrentScreen = () => {
     if (!isClient) {
-      return <LoadingScreen onComplete={() => {}} />;
+      return null;
     }
     switch (appState) {
+      case 'permission':
+        return <PermissionNotice onAgree={handlePermissionAgree} />;
       case 'loading':
         return <LoadingScreen onComplete={handleLoadingComplete} />;
       case 'auth':
