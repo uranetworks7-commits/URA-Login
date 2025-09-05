@@ -1,60 +1,60 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { AlertTriangle, ShieldOff, Timer } from 'lucide-react';
+import { useState } from 'react';
+import { AlertTriangle, ShieldOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { requestUnban } from '@/app/actions';
 
 export interface BannedDetails {
+  username?: string;
   banReason?: string;
   banDuration?: string;
   unbanAt?: number;
 }
 
-interface Countdown {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
-
-const calculateTimeLeft = (unbanAt: number): Countdown | null => {
-  const difference = unbanAt - Date.now();
-  if (difference <= 0) {
-    return null;
-  }
-  return {
-    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((difference / 1000 / 60) % 60),
-    seconds: Math.floor((difference / 1000) % 60),
-  };
-};
-
 export function BannedScreen({ details }: { details: BannedDetails }) {
-  const { banReason, banDuration, unbanAt } = details;
-  const [timeLeft, setTimeLeft] = useState<Countdown | null>(unbanAt ? calculateTimeLeft(unbanAt) : null);
-
-  useEffect(() => {
-    if (!unbanAt) return;
-
-    const timer = setInterval(() => {
-      const newTimeLeft = calculateTimeLeft(unbanAt);
-      setTimeLeft(newTimeLeft);
-      if (!newTimeLeft) {
-        clearInterval(timer);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [unbanAt]);
-
-  const handleRefresh = () => {
-    window.location.reload();
-  };
-
+  const { username, banReason, banDuration } = details;
+  const { toast } = useToast();
+  const [isRequesting, setIsRequesting] = useState(false);
+  
   const isPermanent = banDuration === 'Permanent';
-  const banExpired = unbanAt && !timeLeft;
+
+  const handleUnbanRequest = async () => {
+    if (!username) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Cannot request unban. User identifier is missing.',
+      });
+      return;
+    }
+    setIsRequesting(true);
+    try {
+      const result = await requestUnban(username);
+      if (result.success) {
+        toast({
+          title: 'Success',
+          description: result.message,
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Request Failed',
+          description: result.message,
+        });
+      }
+    } catch (error) {
+       toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'An unexpected error occurred while submitting your request.',
+      });
+    } finally {
+        setIsRequesting(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -77,26 +77,14 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
             </p>
           </div>
 
-          {unbanAt && timeLeft && !isPermanent && (
-            <div className="space-y-2 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-4">
-              <h3 className="flex items-center justify-center gap-2 font-semibold text-yellow-600 dark:text-yellow-400">
-                <Timer className="h-5 w-5" />
-                Time Until Unban
-              </h3>
-              <div className="font-mono text-2xl tracking-widest text-yellow-700 dark:text-yellow-300">
-                {String(timeLeft.days).padStart(2, '0')}:
-                {String(timeLeft.hours).padStart(2, '0')}:
-                {String(timeLeft.minutes).padStart(2, '0')}:
-                {String(timeLeft.seconds).padStart(2, '0')}
-              </div>
-              <p className="text-xs text-muted-foreground">d:h:m:s</p>
-            </div>
-          )}
-          
-          {banExpired && !isPermanent && (
-             <div className="space-y-4">
-                <p className="text-green-600 dark:text-green-400">Your ban duration is over.</p>
-                <Button onClick={handleRefresh}>Click here to Login</Button>
+          {!isPermanent && (
+            <div className="space-y-4 pt-2">
+                 <p className="text-sm text-muted-foreground">
+                    If you believe this is a mistake, you can request a review.
+                </p>
+                <Button onClick={handleUnbanRequest} disabled={isRequesting}>
+                  {isRequesting ? 'Submitting...' : 'Request Unban'}
+                </Button>
             </div>
           )}
 

@@ -27,6 +27,7 @@ export interface UserData {
 }
 
 export interface BannedDetails {
+    username?: string;
     banReason: string;
     banDuration: string;
     unbanAt?: number;
@@ -82,7 +83,7 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         case 2:
             return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
         case 3:
-            return { success: false, message: 'Your account is permanently banned.', status: 'banned', data: { banReason: userData.banReason || 'Violation of terms', banDuration: 'Permanent' } };
+            return { success: false, message: 'Your account is permanently banned.', status: 'banned', data: { username, banReason: userData.banReason || 'Violation of terms', banDuration: 'Permanent' } };
         
         case 4: // 24-hour ban
             unbanTimestamp = new Date(userData.bannedAt).getTime() + (24 * 60 * 60 * 1000);
@@ -90,7 +91,7 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
                 await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
                 return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
             }
-            return { success: false, message: 'Your account is banned for 24 hours.', status: 'banned', data: { banReason: userData.banReason || 'Temporary suspension', banDuration: '24 Hours', unbanAt: unbanTimestamp } };
+            return { success: false, message: 'Your account is banned for 24 hours.', status: 'banned', data: { username, banReason: userData.banReason || 'Temporary suspension', banDuration: '24 Hours', unbanAt: unbanTimestamp } };
 
         case 5: // 7-day ban
             unbanTimestamp = new Date(userData.bannedAt).getTime() + (7 * 24 * 60 * 60 * 1000);
@@ -98,7 +99,7 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
                 await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
                 return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
             }
-            return { success: false, message: 'Your account is banned for 7 days.', status: 'banned', data: { banReason: userData.banReason || 'Extended suspension', banDuration: '7 Days', unbanAt: unbanTimestamp } };
+            return { success: false, message: 'Your account is banned for 7 days.', status: 'banned', data: { username, banReason: userData.banReason || 'Extended suspension', banDuration: '7 Days', unbanAt: unbanTimestamp } };
         
         case 6:
             return { success: false, message: 'This account has been deleted.', status: 'deleted' };
@@ -120,9 +121,26 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
                         await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
                         return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
                     }
-                    return { success: false, message: `Your account is temporarily banned.`, status: 'banned', data: { banReason: userData.banReason, banDuration: userData.banDuration, unbanAt: unbanTimestamp } };
+                    return { success: false, message: `Your account is temporarily banned.`, status: 'banned', data: { username, banReason: userData.banReason, banDuration: userData.banDuration, unbanAt: unbanTimestamp } };
                 }
             }
             return { success: false, message: 'Unknown account status. Please contact support.', status: 'error' };
+    }
+}
+
+export async function requestUnban(username: string): Promise<{ success: boolean; message: string }> {
+    if (!username) {
+        return { success: false, message: 'Username is required.' };
+    }
+    const userRef = ref(db, `users/${username.toLowerCase()}`);
+    try {
+        await update(userRef, {
+            unbanRequest: true,
+            unbanRequestAt: new Date().toISOString(),
+        });
+        return { success: true, message: 'Your unban request has been submitted to the administrators.' };
+    } catch (error) {
+        console.error('Unban request error:', error);
+        return { success: false, message: 'Server error. Could not submit unban request.' };
     }
 }
