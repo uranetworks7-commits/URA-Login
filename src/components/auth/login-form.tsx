@@ -19,12 +19,15 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Switch } from '@/components/ui/switch';
 import { CommandDialog } from './command-dialog';
 import { SettingsPopover } from './settings-popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { TermsDialog } from './terms-dialog';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   email: z.string().email('Invalid email address. The @ symbol is mandatory.').min(1, 'Email is required'),
   rememberMe: z.boolean().default(false),
   autoOpener: z.boolean().default(false),
+  terms: z.boolean().default(true),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -63,7 +66,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
   const [isCmdOpen, setIsCmdOpen] = useState(false);
   const [isInternetAllowed, setIsInternetAllowed] = useState(true);
 
-  const [defaultValues, setDefaultValues] = useState({ username: '', email: '', rememberMe: false, autoOpener: false });
+  const [defaultValues, setDefaultValues] = useState({ username: '', email: '', rememberMe: false, autoOpener: false, terms: true });
 
   useEffect(() => {
     const savedUsername = localStorage.getItem('username');
@@ -72,7 +75,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
     const autoOpener = localStorage.getItem('autoOpener') === 'true';
 
     if (savedUsername && savedEmail) {
-      setDefaultValues({ username: savedUsername, email: savedEmail, rememberMe: rememberMe, autoOpener: autoOpener });
+      setDefaultValues({ username: savedUsername, email: savedEmail, rememberMe: rememberMe, autoOpener: autoOpener, terms: true });
     }
   }, []);
 
@@ -179,7 +182,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Your Email id</FormLabel>
+                  <FormLabel>Your Email Id</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="m@example.com" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" />
                   </FormControl>
@@ -187,66 +190,84 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                 </FormItem>
               )}
             />
-             <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30">
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Aura Access
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 bg-black/70 text-white border-white/20 backdrop-blur-lg">
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-none text-primary">Aura Access</h4>
-                    <p className="text-sm text-white/70">
-                      Manage auto-login and other experimental features.
-                    </p>
-                  </div>
-                    <FormField
-                      control={form.control}
-                      name="rememberMe"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
-                            <FormLabel className="flex items-center gap-2 text-white/80 cursor-pointer text-sm">
-                                <Zap className="h-4 w-4 text-primary" />
-                                Auto Login
-                            </FormLabel>
-                            <FormControl>
-                                <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                />
-                            </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                      <FormField
-                      control={form.control}
-                      name="autoOpener"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
-                            <FormLabel className="flex items-center gap-2 text-white/80 cursor-pointer text-sm">
-                                <BatteryCharging className="h-4 w-4 text-primary" />
-                                Auto Opener
-                            </FormLabel>
-                            <FormControl>
-                                <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                disabled={!form.watch('rememberMe')}
-                                />
-                            </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <Separator className="my-1 bg-white/20" />
-                    <Button variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => setIsCmdOpen(true)}>
-                        <Terminal className="mr-2 h-4 w-4" />
-                        Open CMD
+            <div className="flex items-center gap-4">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Aura Access
                     </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 bg-black/70 text-white border-white/20 backdrop-blur-lg">
+                    <div className="grid gap-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium leading-none text-primary">Aura Access</h4>
+                        <p className="text-sm text-white/70">
+                          Manage auto-login and other experimental features.
+                        </p>
+                      </div>
+                        <FormField
+                          control={form.control}
+                          name="rememberMe"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
+                                <FormLabel className="flex items-center gap-2 text-white/80 cursor-pointer text-sm">
+                                    <Zap className="h-4 w-4 text-primary" />
+                                    Auto Login
+                                </FormLabel>
+                                <FormControl>
+                                    <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    />
+                                </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                          <FormField
+                          control={form.control}
+                          name="autoOpener"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
+                                <FormLabel className="flex items-center gap-2 text-white/80 cursor-pointer text-sm">
+                                    <BatteryCharging className="h-4 w-4 text-primary" />
+                                    Auto Opener
+                                </FormLabel>
+                                <FormControl>
+                                    <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    disabled={!form.watch('rememberMe')}
+                                    />
+                                </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <Separator className="my-1 bg-white/20" />
+                        <Button variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => setIsCmdOpen(true)}>
+                            <Terminal className="mr-2 h-4 w-4" />
+                            Open CMD
+                        </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <FormField
+                    control={form.control}
+                    name="terms"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md p-3 bg-black/20 border-white/20 h-10">
+                        <FormControl>
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="font-normal text-white/80 text-sm">
+                            Accept <TermsDialog />
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => toast({ title: 'Please Create A GitHub Account' })}>
                 <Github className="mr-2 h-4 w-4" />
@@ -295,3 +316,5 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
     </>
   );
 }
+
+    
