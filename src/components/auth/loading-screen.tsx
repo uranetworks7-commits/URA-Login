@@ -42,8 +42,8 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   }, [onComplete]);
 
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center gap-8 bg-background text-foreground">
-      <div className="text-center">
+    <div className="flex h-screen w-full flex-col items-center justify-center gap-8 bg-transparent text-white">
+      <div className="text-center rounded-xl bg-black/30 p-8 backdrop-blur-md">
         <h1 
           className="text-5xl font-bold tracking-tighter"
           style={{
@@ -58,9 +58,9 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
         <div className="flex items-center gap-2">
           {status === 'Connected to Server' ? (
             <>
-              <Globe className="h-4 w-4 text-green-500 animate-pulse" />
+              <Globe className="h-4 w-4 text-green-400 animate-pulse" />
               <span>{status}</span>
-              <ShieldCheck className="h-4 w-4 text-green-500 animate-pulse" />
+              <ShieldCheck className="h-4 w-4 text-green-400 animate-pulse" />
             </>
           ) : (
             <>
