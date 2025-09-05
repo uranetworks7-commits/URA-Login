@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, LogIn, Github } from 'lucide-react';
+import { Loader2, LogIn, Github, MoreVertical } from 'lucide-react';
 import { loginUser, type LoginResult } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -140,7 +141,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => toast({ title: 'Please Create A GitHub Account' })}>
                 <Github className="mr-2 h-4 w-4" />
                 GitHub
@@ -150,10 +151,22 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 Google
               </Button>
             </div>
-            <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => router.push('/signup-ura')}>
-              <UraIcon className="mr-2 h-4 w-4 text-primary" />
-              Sign Up with URA
-            </Button>
+             <div className="relative flex items-center justify-center">
+                <Separator className="w-full bg-white/20" />
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon" className="absolute bg-black/50 border-white/20 hover:bg-black/30 rounded-full">
+                            <MoreVertical className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="bg-black/80 text-white border-white/20">
+                        <DropdownMenuItem onClick={() => router.push('/signup-ura')} className="cursor-pointer hover:bg-primary/20">
+                            <UraIcon className="mr-2 h-4 w-4 text-primary" />
+                            <span>Login with URA</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 pt-4">
             <Button type="submit" className="w-full font-semibold" size="lg" disabled={isSubmitting}>
