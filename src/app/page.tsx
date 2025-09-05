@@ -51,6 +51,8 @@ export default function Home() {
     const noticeAgreed = localStorage.getItem('permissionNoticeAgreed');
     if (!noticeAgreed) {
         setAppState('permission');
+    } else {
+        setAppState('loading');
     }
   }, []);
 
