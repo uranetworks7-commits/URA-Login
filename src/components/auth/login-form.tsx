@@ -82,12 +82,12 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md bg-white/20 text-black border-gray-200/50 backdrop-blur-xl shadow-2xl shadow-black/20">
+    <Card className="w-full max-w-md bg-black/50 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader className="text-center">
             <CardTitle className="text-3xl text-primary font-bold">Login</CardTitle>
-            <CardDescription className="text-black/70 pt-2">Enter your credentials to access your account.</CardDescription>
+            <CardDescription className="text-white/70 pt-2">Enter your credentials to access your account.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6">
             <FormField
@@ -97,7 +97,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="your_username" {...field} className="bg-white/40 border-black/10 focus:bg-white/50 focus:ring-primary/80" />
+                    <Input placeholder="your_username" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -110,7 +110,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="m@example.com" {...field} className="bg-white/40 border-black/10 focus:bg-white/50 focus:ring-primary/80" />
+                    <Input type="email" placeholder="m@example.com" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -126,7 +126,7 @@ export function LoginForm({ onSignupClick, onLoginResult }: LoginFormProps) {
               )}
               Login
             </Button>
-            <Button variant="link" type="button" onClick={onSignupClick} className="text-black/80 hover:text-black">
+            <Button variant="link" type="button" onClick={onSignupClick} className="text-white/80 hover:text-white">
               Don't have an account? Sign Up
             </Button>
           </CardFooter>

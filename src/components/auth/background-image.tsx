@@ -13,7 +13,7 @@ export function BackgroundImage() {
         quality={100}
         priority
       />
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 bg-black/60" />
     </div>
   );
 }

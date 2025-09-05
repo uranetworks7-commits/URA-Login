@@ -81,18 +81,18 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md bg-white/20 text-black border-gray-200/50 backdrop-blur-xl shadow-2xl shadow-black/20">
+    <Card className="w-full max-w-md bg-black/50 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader className="text-center">
             <CardTitle className="text-3xl text-primary font-bold">Create Account</CardTitle>
-            <CardDescription className="text-black/70 pt-2">Admin review may take 24-48 hours.</CardDescription>
+            <CardDescription className="text-white/70 pt-2">Admin review may take 24-48 hours.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <FormField control={form.control} name="username" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Username</FormLabel>
-                  <FormControl><Input placeholder="your_username" {...field} className="bg-white/40 border-black/10 focus:bg-white/50 focus:ring-primary/80" /></FormControl>
+                  <FormControl><Input placeholder="your_username" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -100,7 +100,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
             <FormField control={form.control} name="email" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
-                  <FormControl><Input type="email" placeholder="m@example.com" {...field} className="bg-white/40 border-black/10 focus:bg-white/50 focus:ring-primary/80" /></FormControl>
+                  <FormControl><Input type="email" placeholder="m@example.com" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -108,7 +108,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
             <FormField control={form.control} name="captcha" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Captcha: What is {captcha.num1} + {captcha.num2}?</FormLabel>
-                  <FormControl><Input type="number" placeholder="?" {...field} className="bg-white/40 border-black/10 focus:bg-white/50 focus:ring-primary/80" /></FormControl>
+                  <FormControl><Input type="number" placeholder="?" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -117,12 +117,12 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
                 control={form.control}
                 name="terms"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md p-4 bg-black/5 border-black/10">
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md p-4 bg-white/10 border-white/20">
                     <FormControl>
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="font-normal">
+                      <FormLabel className="font-normal text-white">
                         I agree to the <TermsDialog />
                       </FormLabel>
                       <FormMessage />
@@ -136,7 +136,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
               {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
               Request Account
             </Button>
-            <Button variant="link" type="button" onClick={onLoginClick} className="text-black/80 hover:text-black">
+            <Button variant="link" type="button" onClick={onLoginClick} className="text-white/80 hover:text-white">
               Already have an account? Login
             </Button>
           </CardFooter>
