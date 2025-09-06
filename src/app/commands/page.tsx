@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { availableCommands } from '@/components/auth/command-list';
 
 const ITEMS_PER_PAGE = 6;
+const COMMAND_PREFIX = 'URA//:CMD/';
 
 export default function CommandsPage() {
     const { toast } = useToast();
@@ -23,9 +24,10 @@ export default function CommandsPage() {
     const currentCommands = availableCommands.slice(startIndex, endIndex);
 
     const handleCopy = (command: string) => {
-        navigator.clipboard.writeText(command.split(' ')[0]);
+        const fullCommand = `${COMMAND_PREFIX}${command.split(' ')[0]}`;
+        navigator.clipboard.writeText(fullCommand);
         setCopiedCommand(command);
-        toast({ title: 'Copied!', description: `Command "${command.split(' ')[0]}" copied to clipboard.`});
+        toast({ title: 'Copied!', description: `Command "${fullCommand}" copied to clipboard.`});
         setTimeout(() => setCopiedCommand(null), 2000);
     };
     
@@ -65,7 +67,7 @@ export default function CommandsPage() {
                             {currentCommands.map((cmd) => (
                                 <div key={cmd.command} className="flex items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
                                     <div className="flex-1">
-                                        <p className="font-mono text-primary text-sm sm:text-base">{cmd.command}</p>
+                                        <p className="font-mono text-primary text-sm sm:text-base">{COMMAND_PREFIX}{cmd.command}</p>
                                         <p className="text-xs sm:text-sm text-white/80">{cmd.description}</p>
                                     </div>
                                     <Button

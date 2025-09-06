@@ -31,12 +31,14 @@ interface LogEntry {
   text: string;
 }
 
+const COMMAND_PREFIX = 'URA//:CMD/';
+
 export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked, setLoadingTitle, initialLoginUiState }: CommandDialogProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [command, setCommand] = useState('');
   const [logs, setLogs] = useState<LogEntry[]>([
-      {type: 'response', text: 'URA Command Interface. Type "help" for assistance.'}
+      {type: 'response', text: `URA Command Interface. Type "${COMMAND_PREFIX}help" for assistance.`}
   ]);
   const [colorIndex, setColorIndex] = useState(0);
   const originalPrimaryColor = useRef<string | null>(null);
@@ -46,20 +48,26 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
-  const fullCommandPrefix = "cmd_/";
-  
   const handleCommand = () => {
     if (!command) return;
 
-    const [action, ...args] = command.trim().split(' ');
+    setLogs(prev => [...prev, { type: 'command', text: command }]);
+
+    if (!command.startsWith(COMMAND_PREFIX)) {
+        setLogs(prev => [...prev, { type: 'error', text: `Error: Command must start with "${COMMAND_PREFIX}"` }]);
+        setCommand('');
+        return;
+    }
+
+    const commandWithoutPrefix = command.substring(COMMAND_PREFIX.length);
+    const [action, ...args] = commandWithoutPrefix.trim().split(' ');
     const value = args.join(' ');
 
-    setLogs(prev => [...prev, { type: 'command', text: command }]);
 
     switch(action.toLowerCase()) {
         case 'help': {
             const helpText = availableCommands.map(cmd => 
-                `\n- ${cmd.command}: ${cmd.description}`
+                `\n- ${COMMAND_PREFIX}${cmd.command}: ${cmd.description}`
             ).join('');
             setLogs(prev => [...prev, { type: 'help', text: `Available Commands:${helpText}` }]);
             break;
@@ -101,7 +109,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
         }
         case 'showhidecommand': {
              const specialText = specialCommands.map(cmd => 
-                `\n- ${cmd.command}: ${cmd.description}`
+                `\n- ${COMMAND_PREFIX}${cmd.command}: ${cmd.description}`
              ).join('');
              setLogs(prev => [...prev, { type: 'special', text: `Hidden Commands Unlocked:${specialText}` }]);
              break;
@@ -178,7 +186,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
              setLogs(prev => [...prev, { type: 'special', text: `The cake is a lie.` }]);
              break;
         default: {
-             setLogs(prev => [...prev, { type: 'error', text: `Error: Unknown command "${command}". Type 'help' for a list of commands.` }]);
+             setLogs(prev => [...prev, { type: 'error', text: `Error: Unknown command "${action}". Type '${COMMAND_PREFIX}help' for a list of commands.` }]);
         }
     }
 
@@ -283,7 +291,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
                  'text-yellow-400': log.type === 'special',
                  'text-green-400': log.type === 'response'
                 })}>
-                {log.type === 'command' && <><span className="text-primary/70">{fullCommandPrefix}</span><ChevronRight className="h-4 w-4 mt-px shrink-0 text-primary/50" /></>}
+                {log.type === 'command' && <ChevronRight className="h-4 w-4 mt-px shrink-0 text-primary/50" />}
                 {log.type === 'response' && <span className="shrink-0 text-green-400/50">✓</span>}
                 {log.type === 'error' && <span className="shrink-0 text-destructive/50">✗</span>}
                 {log.type === 'help' && <HelpCircle className="h-4 w-4 mt-px shrink-0 text-cyan-400/50" />}
@@ -295,15 +303,14 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
         </ScrollArea>
         <div className="flex w-full items-center space-x-2">
           <div className="relative flex-1">
-             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/70 font-mono text-sm pointer-events-none">{fullCommandPrefix}</span>
              <Input
                 ref={inputRef}
                 type="text"
-                placeholder="(code)"
+                placeholder="URA//:CMD/(code)"
                 value={command}
                 onChange={(e) => setCommand(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="bg-black/30 border-primary/20 focus:ring-primary/80 pl-14 font-mono"
+                className="bg-black/30 border-primary/20 focus:ring-primary/80 font-mono"
             />
           </div>
           <Button type="button" onClick={() => router.push('/commands')} variant="secondary" size="icon">
@@ -332,5 +339,3 @@ declare global {
         confetti?: any;
     }
 }
-
-    
