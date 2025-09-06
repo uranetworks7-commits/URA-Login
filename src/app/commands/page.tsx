@@ -1,26 +1,42 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Clipboard, ArrowLeft } from 'lucide-react';
+import { Check, Clipboard, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { BackgroundImage } from '@/components/auth/background-image';
 import { useRouter } from 'next/navigation';
 import { availableCommands } from '@/components/auth/command-list';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
+const ITEMS_PER_PAGE = 6;
 
 export default function CommandsPage() {
     const { toast } = useToast();
     const router = useRouter();
     const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const totalPages = Math.ceil(availableCommands.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const currentCommands = availableCommands.slice(startIndex, endIndex);
 
     const handleCopy = (command: string) => {
-        navigator.clipboard.writeText(command);
+        navigator.clipboard.writeText(command.split(' ')[0]);
         setCopiedCommand(command);
-        toast({ title: 'Copied!', description: `Command "${command}" copied to clipboard.`});
+        toast({ title: 'Copied!', description: `Command "${command.split(' ')[0]}" copied to clipboard.`});
         setTimeout(() => setCopiedCommand(null), 2000);
     };
+    
+    const handleNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    }
+    
+    const handlePrevPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    }
+
 
     return (
         <main className="relative flex min-h-screen flex-col items-center justify-center p-4">
@@ -31,34 +47,43 @@ export default function CommandsPage() {
                         <CardTitle className="text-3xl text-primary font-bold">Available CMD Commands</CardTitle>
                         <CardDescription className="text-white/70 pt-2">Here is a list of all commands you can use in the CMD interface.</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <ScrollArea className="h-[60vh] pr-4">
-                            <div className="space-y-4">
-                                {availableCommands.map((cmd) => (
-                                    <div key={cmd.command} className="flex items-center justify-between rounded-lg bg-black/20 p-4 border border-white/20">
-                                        <div>
-                                            <p className="font-mono text-primary">{cmd.command}</p>
-                                            <p className="text-sm text-white/80">{cmd.description}</p>
-                                        </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleCopy(cmd.command)}
-                                            className="text-white/70 hover:text-white hover:bg-white/10"
-                                        >
-                                            {copiedCommand === cmd.command ? <Check className="h-4 w-4 text-green-400" /> : <Clipboard className="h-4 w-4" />}
-                                        </Button>
+                    <CardContent className="h-[380px]">
+                        <div className="space-y-4">
+                            {currentCommands.map((cmd) => (
+                                <div key={cmd.command} className="flex items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
+                                    <div className="flex-1">
+                                        <p className="font-mono text-primary text-sm sm:text-base">{cmd.command}</p>
+                                        <p className="text-xs sm:text-sm text-white/80">{cmd.description}</p>
                                     </div>
-                                ))}
-                            </div>
-                        </ScrollArea>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleCopy(cmd.command)}
+                                        className="text-white/70 hover:text-white hover:bg-white/10 ml-2"
+                                    >
+                                        {copiedCommand === cmd.command ? <Check className="h-4 w-4 text-green-400" /> : <Clipboard className="h-4 w-4" />}
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
                     </CardContent>
-                     <CardHeader className="text-center pt-6">
-                         <Button variant="link" type="button" onClick={() => router.push('/')} className="text-white/80 hover:text-white">
+                     <CardFooter className="flex-col gap-4 pt-4">
+                        <div className="flex items-center justify-center w-full space-x-4">
+                            <Button onClick={handlePrevPage} disabled={currentPage === 1} variant="outline" className="bg-transparent hover:bg-white/10">
+                                <ArrowLeft className="mr-2 h-4 w-4"/>
+                                Previous
+                            </Button>
+                            <span className="font-mono text-sm">Page {currentPage} of {totalPages}</span>
+                             <Button onClick={handleNextPage} disabled={currentPage === totalPages} variant="outline" className="bg-transparent hover:bg-white/10">
+                                Next
+                                <ArrowRight className="ml-2 h-4 w-4"/>
+                            </Button>
+                        </div>
+                         <Button variant="link" type="button" onClick={() => router.push('/')} className="text-white/80 hover:text-white mt-4">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Login
                         </Button>
-                    </CardHeader>
+                    </CardFooter>
                 </Card>
             </div>
         </main>

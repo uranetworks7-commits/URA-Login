@@ -18,6 +18,8 @@ export const availableCommands = [
     { command: 'toast_message [text]', description: 'Show a toast notification.'},
     { command: 'confetti', description: 'Launch confetti effect.'},
     { command: 'secret_message', description: 'Show hidden Easter egg message.'},
+    { command: 'matrix', description: 'Initiates matrix rain effect (not implemented).'},
+    { command: 'godmode', description: 'Unlocks all features (not implemented).'},
 ];
 
 export const specialCommands = [
