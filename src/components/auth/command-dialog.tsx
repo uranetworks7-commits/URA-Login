@@ -219,7 +219,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
 
       // Reset state
       setUiState(initialLoginUiState);
-      // setLoadingTitle is intentionally not called here to avoid overwriting the login title
+      setLoadingTitle("URA Networks 2.0");
       setIsLoginBlocked(false);
       onHackEffectToggle(false);
 
@@ -306,7 +306,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
              <Input
                 ref={inputRef}
                 type="text"
-                placeholder="URA//:CMD/(code)"
+                placeholder="URA//:CMD/code"
                 value={command}
                 onChange={(e) => setCommand(e.target.value)}
                 onKeyPress={handleKeyPress}
