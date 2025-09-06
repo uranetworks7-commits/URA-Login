@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Loader2, LogIn, Github, MoreVertical, Zap, BatteryCharging, Sparkles, Terminal, Settings } from 'lucide-react';
 import { loginUser, type LoginResult } from '@/app/actions';
+import type { LoginUIState } from '@/app/page';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +38,8 @@ interface LoginFormProps {
   onSignupClick: () => void;
   onLoginResult: (result: LoginResult) => void;
   onHackEffectToggle: (isActive: boolean) => void;
+  uiState: LoginUIState;
+  setUiState: React.Dispatch<React.SetStateAction<LoginUIState>>;
 }
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -59,8 +62,23 @@ const UraIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const shakeAnimation = {
+  animation: 'shake 0.5s',
+  animationIterationCount: '1',
+};
 
-export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: LoginFormProps) {
+const keyframes = `
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(5px); }
+  50% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}
+`;
+
+
+export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, uiState, setUiState }: LoginFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -152,14 +170,29 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
     }
   };
 
+  const cardStyle = {
+    color: uiState.textColor,
+    boxShadow: uiState.glowColor ? `0 0 20px ${uiState.glowColor}`: undefined,
+    ...(uiState.shake ? shakeAnimation : {}),
+  }
+
   return (
     <>
-    <Card className="w-full max-w-lg rounded-2xl border backdrop-blur-2xl border-white/10 bg-white/5 shadow-2xl shadow-black/20 text-white">
+    <style>{keyframes}</style>
+    <Card 
+      className={cn(
+        "w-full max-w-lg rounded-2xl border backdrop-blur-2xl transition-all duration-300",
+        uiState.theme === 'dark' 
+          ? "border-white/10 bg-white/5 shadow-2xl shadow-black/20 text-white" 
+          : "border-black/10 bg-black/5 shadow-2xl shadow-white/20 text-black",
+      )}
+      style={cardStyle}
+    >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader className="text-center relative">
-            <CardTitle className="text-3xl text-primary font-bold">Login</CardTitle>
-            <CardDescription className="text-white/70 pt-2">Enter your credentials to access your account.</CardDescription>
+            <CardTitle className="text-3xl text-primary font-bold">{uiState.title}</CardTitle>
+            <CardDescription className={cn("pt-2", uiState.theme === 'dark' ? "text-white/70" : "text-black/70")}>{uiState.subtitle}</CardDescription>
             <div className="absolute top-4 right-4">
                 <SettingsPopover onInternetAccessChange={setIsInternetAllowed} />
             </div>
@@ -170,9 +203,9 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white/80">Your Username</FormLabel>
+                  <FormLabel className={cn(uiState.theme === 'dark' ? "text-white/80" : "text-black/80")}>Your Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="your_username" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80 text-white" />
+                    <Input placeholder="your_username" {...field} className={cn("focus:ring-primary/80", uiState.theme === 'dark' ? "bg-black/20 border-white/20 text-white focus:bg-black/30" : "bg-white/20 border-black/20 text-black focus:bg-white/30")} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -183,9 +216,9 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white/80">Your Email Id</FormLabel>
+                  <FormLabel className={cn(uiState.theme === 'dark' ? "text-white/80" : "text-black/80")}>Your Email Id</FormLabel>
                   <FormControl>
-                    <Input type="text" placeholder="m@example.com" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80 text-white" />
+                    <Input type="text" placeholder="m@example.com" {...field} className={cn("focus:ring-primary/80", uiState.theme === 'dark' ? "bg-black/20 border-white/20 text-white focus:bg-black/30" : "bg-white/20 border-black/20 text-black focus:bg-white/30")} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -193,16 +226,16 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
             />
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30 text-white">
+                <Button variant="outline" className={cn("w-full hover:bg-black/30", uiState.theme === 'dark' ? 'bg-black/20 border-white/20 text-white' : 'bg-white/20 border-black/20 text-black')}>
                     <Sparkles className="mr-2 h-4 w-4" />
                     Aura Access
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 bg-black/70 text-white border-white/20 backdrop-blur-lg">
+              <PopoverContent className={cn("w-80 backdrop-blur-lg", uiState.theme === 'dark' ? "bg-black/70 text-white border-white/20" : "bg-white/70 text-black border-black/20")}>
                 <div className="grid gap-4">
                   <div className="space-y-2">
                     <h4 className="font-medium leading-none text-primary">Aura Access</h4>
-                    <p className="text-sm text-white/70">
+                    <p className={cn("text-sm", uiState.theme === 'dark' ? 'text-white/70' : 'text-black/70')}>
                       Manage auto-login and other experimental features.
                     </p>
                   </div>
@@ -210,8 +243,8 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                       control={form.control}
                       name="rememberMe"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
-                            <FormLabel className="flex items-center gap-2 text-white/80 cursor-pointer text-sm">
+                        <FormItem className={cn("flex flex-row items-center justify-between rounded-lg p-3 border", uiState.theme === 'dark' ? "bg-black/20 border-white/20" : "bg-white/20 border-black/20")}>
+                            <FormLabel className={cn("flex items-center gap-2 cursor-pointer text-sm", uiState.theme === 'dark' ? 'text-white/80' : 'text-black/80')}>
                                 <Zap className="h-4 w-4 text-primary" />
                                 Auto Login
                             </FormLabel>
@@ -228,8 +261,8 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                       control={form.control}
                       name="autoOpener"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
-                            <FormLabel className="flex items-center gap-2 text-white/80 cursor-pointer text-sm">
+                        <FormItem className={cn("flex flex-row items-center justify-between rounded-lg p-3 border", uiState.theme === 'dark' ? "bg-black/20 border-white/20" : "bg-white/20 border-black/20")}>
+                            <FormLabel className={cn("flex items-center gap-2 cursor-pointer text-sm", uiState.theme === 'dark' ? 'text-white/80' : 'text-black/80')}>
                                 <BatteryCharging className="h-4 w-4 text-primary" />
                                 Auto Opener
                             </FormLabel>
@@ -243,8 +276,8 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                         </FormItem>
                       )}
                     />
-                    <Separator className="my-1 bg-white/20" />
-                    <Button variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30 text-white" onClick={() => setIsCmdOpen(true)}>
+                    <Separator className={cn("my-1", uiState.theme === 'dark' ? 'bg-white/20' : 'bg-black/20')} />
+                    <Button variant="outline" className={cn("w-full hover:bg-black/30", uiState.theme === 'dark' ? 'bg-black/20 border-white/20 text-white' : 'bg-white/20 border-black/20 text-black')} onClick={() => setIsCmdOpen(true)}>
                         <Terminal className="mr-2 h-4 w-4" />
                         Open CMD
                     </Button>
@@ -252,11 +285,11 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
               </PopoverContent>
             </Popover>
             <div className="grid grid-cols-2 gap-4">
-              <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30 text-white" onClick={() => toast({ title: 'Please Create A GitHub Account' })}>
+              <Button type="button" variant="outline" className={cn("w-full hover:bg-black/30", uiState.theme === 'dark' ? 'bg-black/20 border-white/20 text-white' : 'bg-white/20 border-black/20 text-black')} onClick={() => toast({ title: 'Please Create A GitHub Account' })}>
                 <Github className="mr-2 h-4 w-4" />
                 GitHub
               </Button>
-                <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30 text-white" onClick={handleGoogleClick}>
+                <Button type="button" variant="outline" className={cn("w-full hover:bg-black/30", uiState.theme === 'dark' ? 'bg-black/20 border-white/20 text-white' : 'bg-white/20 border-black/20 text-black')} onClick={handleGoogleClick}>
                     <GoogleIcon className="mr-2 h-4 w-4" />
                     Google
                 </Button>
@@ -271,7 +304,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                         <FormControl>
                           <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
-                        <FormLabel className="font-normal text-white/80 text-sm -translate-y-px">
+                        <FormLabel className={cn("font-normal text-sm -translate-y-px", uiState.theme === 'dark' ? 'text-white/80' : 'text-black/80')}>
                             Accept <TermsDialog />
                         </FormLabel>
                       </FormItem>
@@ -279,12 +312,12 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                   />
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-white/80 bg-transparent border-none hover:bg-white/10 rounded-full h-8 w-8">
+                        <Button variant="ghost" size="icon" className={cn("bg-transparent border-none rounded-full h-8 w-8", uiState.theme === 'dark' ? "text-white/80 hover:bg-white/10" : "text-black/80 hover:bg-black/10")}>
                             <MoreVertical className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-black/80 text-white border-white/20">
-                        <DropdownMenuItem onClick={() => router.push('/signup-ura')} className="cursor-pointer hover:bg-primary/20">
+                    <DropdownMenuContent align="end" className={cn("border", uiState.theme === 'dark' ? 'bg-black/80 text-white border-white/20' : 'bg-white/80 text-black border-black/20')}>
+                        <DropdownMenuItem onClick={() => router.push('/signup-ura')} className="cursor-pointer hover:!bg-primary/20">
                             <UraIcon className="mr-2 h-4 w-4 text-primary" />
                             <span>Login with URA</span>
                         </DropdownMenuItem>
@@ -300,17 +333,17 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
               ) : (
                 <LogIn className="mr-2 h-4 w-4" />
               )}
-              Login
+              {uiState.buttonText}
             </Button>
-            <Separator className="my-2 bg-white/20" />
-            <Button variant="link" type="button" onClick={onSignupClick} className="text-white/80 hover:text-white">
+            <Separator className={cn("my-2", uiState.theme === 'dark' ? 'bg-white/20' : 'bg-black/20')} />
+            <Button variant="link" type="button" onClick={onSignupClick} className={cn("hover:text-white", uiState.theme === 'dark' ? 'text-white/80' : 'text-black/80')}>
               Don't have an account? Sign Up
             </Button>
           </CardFooter>
         </form>
       </Form>
     </Card>
-    <CommandDialog open={isCmdOpen} onOpenChange={setIsCmdOpen} onHackEffectToggle={onHackEffectToggle} />
+    <CommandDialog open={isCmdOpen} onOpenChange={setIsCmdOpen} onHackEffectToggle={onHackEffectToggle} uiState={uiState} setUiState={setUiState} />
     </>
   );
 }

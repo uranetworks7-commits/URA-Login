@@ -8,11 +8,14 @@ import { Terminal, ChevronRight, Save, HelpCircle, RefreshCcw, PowerOff } from '
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import type { LoginUIState } from '@/app/page';
 
 interface CommandDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onHackEffectToggle: (isActive: boolean) => void;
+  uiState: LoginUIState;
+  setUiState: React.Dispatch<React.SetStateAction<LoginUIState>>;
 }
 
 interface LogEntry {
@@ -36,6 +39,17 @@ const availableCommands = [
     { command: 'swapcolor', description: 'Cycles through available UI colors.' },
     { command: 'hackeffect', description: 'Toggles a visual hacking effect on the screen.' },
     { command: 'showhidecommand', description: 'Reveals hidden special commands.' },
+    { command: 'set_title [text]', description: 'Change the login form title.' },
+    { command: 'set_subtitle [text]', description: 'Change the login form subtitle.' },
+    { command: 'set_button [text]', description: 'Change the login button text.' },
+    { command: 'theme_dark', description: 'Switch login panel to dark mode.' },
+    { command: 'theme_light', description: 'Switch login panel to light mode.' },
+    { command: 'set_text_color [color]', description: 'Change login panel text color (e.g., #FFFFFF).'},
+    { command: 'login_shake', description: 'Shake login form (on wrong password).'},
+    { command: 'login_glow [color]', description: 'Glow effect on login panel (e.g., #FFFFFF).'},
+    { command: 'toast_message [text]', description: 'Show a toast notification.'},
+    { command: 'confetti', description: 'Launch confetti effect.'},
+    { command: 'secret_message', description: 'Show hidden Easter egg message.'},
 ];
 
 const specialCommands = [
@@ -44,7 +58,7 @@ const specialCommands = [
 ]
 
 
-export function CommandDialog({ open, onOpenChange, onHackEffectToggle }: CommandDialogProps) {
+export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState, setUiState }: CommandDialogProps) {
   const { toast } = useToast();
   const [command, setCommand] = useState('');
   const [logs, setLogs] = useState<LogEntry[]>([
@@ -57,14 +71,16 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle }: Comman
   const inputRef = useRef<HTMLInputElement>(null);
   
   const fullCommandPrefix = "URA//APP//:";
-
+  
   const handleCommand = () => {
     if (!command) return;
 
-    setLogs(prev => [...prev, { type: 'command', text: command }]);
-    const action = command.trim().toLowerCase();
+    const [action, ...args] = command.trim().split(' ');
+    const value = args.join(' ');
 
-    switch(action) {
+    setLogs(prev => [...prev, { type: 'command', text: command }]);
+
+    switch(action.toLowerCase()) {
         case 'help': {
             const helpText = availableCommands.map(cmd => 
                 `\n- ${cmd.command}: ${cmd.description}`
@@ -94,6 +110,73 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle }: Comman
              setLogs(prev => [...prev, { type: 'special', text: `Hidden Commands Unlocked:${specialText}` }]);
              break;
         }
+        case 'set_title':
+            setUiState(s => ({...s, title: value}));
+            setLogs(prev => [...prev, {type: 'response', text: `Title set to "${value}"`}]);
+            break;
+        case 'set_subtitle':
+            setUiState(s => ({...s, subtitle: value}));
+            setLogs(prev => [...prev, {type: 'response', text: `Subtitle set to "${value}"`}]);
+            break;
+        case 'set_button':
+            setUiState(s => ({...s, buttonText: value}));
+            setLogs(prev => [...prev, {type: 'response', text: `Button text set to "${value}"`}]);
+            break;
+        case 'theme_dark':
+            setUiState(s => ({...s, theme: 'dark'}));
+            setLogs(prev => [...prev, {type: 'response', text: `Theme set to dark.`}]);
+            break;
+        case 'theme_light':
+            setUiState(s => ({...s, theme: 'light'}));
+            setLogs(prev => [...prev, {type: 'response', text: `Theme set to light.`}]);
+            break;
+        case 'set_text_color':
+            setUiState(s => ({...s, textColor: value}));
+            setLogs(prev => [...prev, {type: 'response', text: `Text color set to ${value}.`}]);
+            break;
+        case 'login_shake':
+            setUiState(s => ({...s, shake: true}));
+            setTimeout(() => setUiState(s => ({...s, shake: false})), 500);
+            setLogs(prev => [...prev, {type: 'response', text: `Login panel shaken.`}]);
+            break;
+        case 'login_glow':
+            setUiState(s => ({...s, glowColor: value}));
+            setLogs(prev => [...prev, {type: 'response', text: `Login panel glow set to ${value}.`}]);
+            break;
+        case 'toast_message':
+            toast({ title: 'CMD Toast', description: value });
+            setLogs(prev => [...prev, {type: 'response', text: `Toast sent.`}]);
+            break;
+        case 'confetti':
+            const end = Date.now() + (3 * 1000);
+            const colors = ['#a864fd', '#29cdff', '#78ff44', '#ff718d', '#fdff6a'];
+
+            (function frame() {
+                if (Date.now() > end) return;
+
+                if (typeof window !== 'undefined' && window.confetti) {
+                    window.confetti({
+                        particleCount: 2,
+                        angle: 60,
+                        spread: 55,
+                        origin: { x: 0 },
+                        colors: colors,
+                    });
+                    window.confetti({
+                        particleCount: 2,
+                        angle: 120,
+                        spread: 55,
+                        origin: { x: 1 },
+                        colors: colors,
+                    });
+                }
+                requestAnimationFrame(frame);
+            }());
+            setLogs(prev => [...prev, { type: 'response', text: 'Confetti!!!' }]);
+            break;
+        case 'secret_message':
+             setLogs(prev => [...prev, { type: 'special', text: `The cake is a lie.` }]);
+             break;
         default: {
              setLogs(prev => [...prev, { type: 'error', text: `Error: Unknown command "${command}". Type 'help' for a list of commands.` }]);
         }
@@ -114,12 +197,30 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle }: Comman
       }
       onHackEffectToggle(false);
       setLogs([{type: 'response', text: 'UI has been reset to default state.'}]);
+      setUiState({
+        title: 'Login',
+        subtitle: 'Enter your credentials to access your account.',
+        buttonText: 'Login',
+        theme: 'dark',
+        shake: false,
+        textColor: undefined,
+        glowColor: undefined,
+      });
       toast({
           title: 'UI Reset',
           description: 'All CMD modifications have been reverted.'
       })
   }
   
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.confetti) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js';
+        script.async = true;
+        document.body.appendChild(script);
+    }
+  }, []);
+
   useEffect(() => {
     if (open) {
         if (!originalPrimaryColor.current) {
@@ -196,4 +297,10 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle }: Comman
       </DialogContent>
     </Dialog>
   );
+}
+
+declare global {
+    interface Window {
+        confetti?: any;
+    }
 }

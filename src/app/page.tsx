@@ -18,6 +18,16 @@ import { QuickLoginForm } from '@/components/auth/quick-login-form';
 type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError';
 type AuthMode = 'login' | 'signup';
 
+export interface LoginUIState {
+  title: string;
+  subtitle: string;
+  buttonText: string;
+  theme: 'dark' | 'light';
+  textColor?: string;
+  glowColor?: string;
+  shake: boolean;
+}
+
 const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => {
   useEffect(() => {
     if (user) {
@@ -50,6 +60,18 @@ export default function Home() {
   const [quickLoginUser, setQuickLoginUser] = useState<UserData | null>(null);
   const [autoOpen, setAutoOpen] = useState(false);
   const [isHackEffectActive, setIsHackEffectActive] = useState(false);
+
+  const [loginUiState, setLoginUiState] = useState<LoginUIState>({
+    title: 'Login',
+    subtitle: 'Enter your credentials to access your account.',
+    buttonText: 'Login',
+    theme: 'dark',
+    shake: false,
+  });
+
+  const setShake = (shake: boolean) => {
+    setLoginUiState(prev => ({...prev, shake}));
+  }
 
 
   useEffect(() => {
@@ -99,6 +121,9 @@ export default function Home() {
         setAppState('banned');
     } else if (result.status === 'error') {
         setAppState('serverError');
+    } else {
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
     }
   };
   
@@ -149,7 +174,13 @@ export default function Home() {
           <div className="flex min-h-screen items-start justify-center p-4 pt-16 [perspective:1000px]">
              <div className={cn('relative w-full max-w-lg transition-transform duration-700 [transform-style:preserve-3d]', { '[transform:rotateY(180deg)]': isFlipped })}>
                 <div className="absolute w-full [backface-visibility:hidden]">
-                    <LoginForm onSignupClick={toggleAuthMode} onLoginResult={handleLoginResult} onHackEffectToggle={setIsHackEffectActive} />
+                    <LoginForm 
+                      onSignupClick={toggleAuthMode} 
+                      onLoginResult={handleLoginResult} 
+                      onHackEffectToggle={setIsHackEffectActive}
+                      uiState={loginUiState}
+                      setUiState={setLoginUiState}
+                    />
                 </div>
                 <div className="absolute w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
                     <SignupForm onLoginClick={toggleAuthMode} />
