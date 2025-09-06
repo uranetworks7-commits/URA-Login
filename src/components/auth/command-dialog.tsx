@@ -46,7 +46,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
-  const fullCommandPrefix = "URA//APP//:";
+  const fullCommandPrefix = "cmd_/";
   
   const handleCommand = () => {
     if (!command) return;
@@ -299,11 +299,11 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
              <Input
                 ref={inputRef}
                 type="text"
-                placeholder="..."
+                placeholder="(code)"
                 value={command}
                 onChange={(e) => setCommand(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="bg-black/30 border-primary/20 focus:ring-primary/80 pl-[100px] font-mono"
+                className="bg-black/30 border-primary/20 focus:ring-primary/80 pl-14 font-mono"
             />
           </div>
           <Button type="button" onClick={() => router.push('/commands')} variant="secondary" size="icon">
@@ -332,3 +332,5 @@ declare global {
         confetti?: any;
     }
 }
+
+    
