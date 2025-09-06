@@ -61,6 +61,7 @@ export default function Home() {
   const [autoOpen, setAutoOpen] = useState(false);
   const [isHackEffectActive, setIsHackEffectActive] = useState(false);
   const [isLoginBlocked, setIsLoginBlocked] = useState(false);
+  const [loadingTitle, setLoadingTitle] = useState('URA Networks 2.0');
 
   const [loginUiState, setLoginUiState] = useState<LoginUIState>({
     title: 'Login',
@@ -167,7 +168,7 @@ export default function Home() {
       case 'permission':
         return <PermissionNotice onAgree={handlePermissionAgree} />;
       case 'loading':
-        return <LoadingScreen onComplete={handleLoadingComplete} />;
+        return <LoadingScreen onComplete={handleLoadingComplete} title={loadingTitle} />;
       case 'quickLogin':
         return quickLoginUser && <QuickLoginForm user={quickLoginUser} onLoginResult={handleLoginResult} onExit={handleExitQuickLogin} autoOpen={autoOpen} />;
       case 'auth':
@@ -183,6 +184,7 @@ export default function Home() {
                       setUiState={setLoginUiState}
                       isLoginBlocked={isLoginBlocked}
                       setIsLoginBlocked={setIsLoginBlocked}
+                      setLoadingTitle={setLoadingTitle}
                     />
                 </div>
                 <div className="absolute w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
@@ -203,7 +205,7 @@ export default function Home() {
         return <ServerErrorScreen />;
       default:
         // Fallback to loading screen
-        return <LoadingScreen onComplete={handleLoadingComplete} />;
+        return <LoadingScreen onComplete={handleLoadingComplete} title={loadingTitle} />;
     }
   };
 

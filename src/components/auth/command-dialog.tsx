@@ -21,6 +21,7 @@ interface CommandDialogProps {
   setUiState: React.Dispatch<React.SetStateAction<LoginUIState>>;
   isLoginBlocked: boolean;
   setIsLoginBlocked: (isBlocked: boolean) => void;
+  setLoadingTitle: (title: string) => void;
 }
 
 interface LogEntry {
@@ -28,7 +29,7 @@ interface LogEntry {
   text: string;
 }
 
-export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked }: CommandDialogProps) {
+export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked, setLoadingTitle }: CommandDialogProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [command, setCommand] = useState('');
@@ -111,6 +112,10 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
             setUiState(s => ({...s, subtitle: value}));
             setLogs(prev => [...prev, {type: 'response', text: `Subtitle set to "${value}"`}]);
             break;
+        case 'setname':
+            setLoadingTitle(value);
+            setLogs(prev => [...prev, {type: 'response', text: `Loading screen name set to "${value}"`}]);
+            break;
         case 'set_button':
             setUiState(s => ({...s, buttonText: value}));
             setLogs(prev => [...prev, {type: 'response', text: `Button text set to "${value}"`}]);
@@ -190,6 +195,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
       }
       onHackEffectToggle(false);
       setIsLoginBlocked(false);
+      setLoadingTitle('URA Networks 2.0');
       setLogs([{type: 'response', text: 'UI has been reset to default state.'}]);
       setUiState({
         title: 'Login',

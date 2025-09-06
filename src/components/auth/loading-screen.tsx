@@ -12,7 +12,12 @@ const DotLoading = () => (
   </span>
 );
 
-export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
+interface LoadingScreenProps {
+    onComplete: () => void;
+    title: string;
+}
+
+export function LoadingScreen({ onComplete, title }: LoadingScreenProps) {
   const [status, setStatus] = useState('Connecting to Server...');
   const [securityStatus, setSecurityStatus] = useState('');
 
@@ -51,7 +56,7 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
             textShadow: '0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3)',
           }}
         >
-          URA Networks 2.0
+          {title}
         </h1>
       </div>
       <div className="mt-4 w-72 space-y-3 font-mono text-sm">
