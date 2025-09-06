@@ -47,8 +47,7 @@ export default function CommandsPage() {
                         <Button variant="ghost" size="icon" onClick={() => router.push('/')} className="absolute top-4 left-4 text-white/80 hover:text-white hover:bg-white/10">
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
-                        <CardTitle className="text-3xl text-primary font-bold pt-2">Available CMD Commands</CardTitle>
-                        <CardDescription className="text-white/70 pt-2">Here is a list of all commands you can use in the CMD interface.</CardDescription>
+                        <CardTitle className="text-3xl text-primary font-bold pt-2">CMD Commands</CardTitle>
                         <div className="flex items-center justify-center w-full space-x-4 pt-4">
                             <Button onClick={handlePrevPage} disabled={currentPage === 1} variant="outline" className="bg-transparent hover:bg-white/10">
                                 <ArrowLeft className="mr-2 h-4 w-4"/>
