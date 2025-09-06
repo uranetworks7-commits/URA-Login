@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import type { LoginUIState } from '@/app/page';
 import { QuickColorDialog, colorMap, colorCycle } from './quick-color-dialog';
 import { availableCommands, specialCommands } from './command-list';
+import { SetNameDialog } from './set-name-dialog';
 
 interface CommandDialogProps {
   open: boolean;
@@ -39,6 +40,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
   const [colorIndex, setColorIndex] = useState(0);
   const originalPrimaryColor = useRef<string | null>(null);
   const [isQuickColorOpen, setIsQuickColorOpen] = useState(false);
+  const [isSetNameOpen, setIsSetNameOpen] = useState(false);
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -105,13 +107,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
              break;
         }
         case 'setname': {
-            const newName = window.prompt("Enter the new name for the Loading and Login screens:");
-            if (newName) {
-                setLoadingTitle(newName);
-                setLogs(prev => [...prev, {type: 'response', text: `Display name set to "${newName}"`}]);
-            } else {
-                 setLogs(prev => [...prev, {type: 'error', text: `Name change cancelled.`}]);
-            }
+            setIsSetNameOpen(true);
             break;
         }
         case 'set_title':
@@ -187,6 +183,16 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
     }
 
     setCommand('');
+  };
+
+  const handleSetNameSubmit = (newName: string) => {
+    if (newName) {
+        setLoadingTitle(newName);
+        setLogs(prev => [...prev, {type: 'response', text: `Display name set to "${newName}"`}]);
+    } else {
+         setLogs(prev => [...prev, {type: 'error', text: `Name change cancelled.`}]);
+    }
+    setIsSetNameOpen(false);
   };
   
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -308,6 +314,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
       </DialogContent>
     </Dialog>
     <QuickColorDialog open={isQuickColorOpen} onOpenChange={setIsQuickColorOpen} setColorIndex={setColorIndex} />
+    <SetNameDialog open={isSetNameOpen} onOpenChange={setIsSetNameOpen} onSubmit={handleSetNameSubmit} />
     </>
   );
 }
