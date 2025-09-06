@@ -44,7 +44,7 @@ export default function CommandsPage() {
             <div className="relative z-10 w-full flex items-center justify-center">
                 <Card className="w-full max-w-2xl bg-black/70 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
                     <CardHeader className="text-center relative">
-                        <Button variant="ghost" size="icon" onClick={() => router.push('/')} className="absolute top-4 left-4 text-white/80 hover:text-white hover:bg-white/10">
+                        <Button variant="ghost" size="icon" onClick={() => router.back()} className="absolute top-4 left-4 text-white/80 hover:text-white hover:bg-white/10">
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
                         <CardTitle className="text-3xl text-primary font-bold pt-2">CMD Commands</CardTitle>
