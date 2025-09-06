@@ -70,6 +70,11 @@ export default function Home() {
     theme: 'dark',
     shake: false,
   });
+  
+  const handleSetName = (newName: string) => {
+    setLoadingTitle(newName);
+    setLoginUiState(prev => ({ ...prev, title: newName }));
+  };
 
   const setShake = (shake: boolean) => {
     setLoginUiState(prev => ({...prev, shake}));
@@ -184,7 +189,7 @@ export default function Home() {
                       setUiState={setLoginUiState}
                       isLoginBlocked={isLoginBlocked}
                       setIsLoginBlocked={setIsLoginBlocked}
-                      setLoadingTitle={setLoadingTitle}
+                      setLoadingTitle={handleSetName}
                     />
                 </div>
                 <div className="absolute w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">

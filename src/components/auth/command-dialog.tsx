@@ -104,6 +104,16 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
              setLogs(prev => [...prev, { type: 'special', text: `Hidden Commands Unlocked:${specialText}` }]);
              break;
         }
+        case 'setname': {
+            const newName = window.prompt("Enter the new name for the Loading and Login screens:");
+            if (newName) {
+                setLoadingTitle(newName);
+                setLogs(prev => [...prev, {type: 'response', text: `Display name set to "${newName}"`}]);
+            } else {
+                 setLogs(prev => [...prev, {type: 'error', text: `Name change cancelled.`}]);
+            }
+            break;
+        }
         case 'set_title':
             setUiState(s => ({...s, title: value}));
             setLogs(prev => [...prev, {type: 'response', text: `Title set to "${value}"`}]);
@@ -111,10 +121,6 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
         case 'set_subtitle':
             setUiState(s => ({...s, subtitle: value}));
             setLogs(prev => [...prev, {type: 'response', text: `Subtitle set to "${value}"`}]);
-            break;
-        case 'setname':
-            setLoadingTitle(value);
-            setLogs(prev => [...prev, {type: 'response', text: `Loading screen name set to "${value}"`}]);
             break;
         case 'set_button':
             setUiState(s => ({...s, buttonText: value}));
