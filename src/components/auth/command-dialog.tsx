@@ -211,7 +211,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
 
       // Reset state
       setUiState(initialLoginUiState);
-      setLoadingTitle('URA Networks 2.0');
+      // setLoadingTitle is intentionally not called here to avoid overwriting the login title
       setIsLoginBlocked(false);
       onHackEffectToggle(false);
 
