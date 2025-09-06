@@ -19,8 +19,7 @@ import { Separator } from '@/components/ui/separator';
 const signupSchema = z.object({
   username: z.string()
     .transform(val => val.toLowerCase())
-    .refine(val => val.length >= 2, { message: 'Username must be at least 2 characters.'})
-    .refine(val => val.includes('@'), { message: 'Username must contain the @ symbol.' }),
+    .refine(val => val.length >= 2, { message: 'Username must be at least 2 characters.'}),
   email: z.string().email('Invalid email address. The @ symbol is mandatory.'),
   captcha: z.string().min(1, 'Captcha is required'),
   terms: z.boolean().refine(val => val === true, { message: 'You must accept the terms and conditions.' }),
