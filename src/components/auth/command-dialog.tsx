@@ -1,14 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Terminal, ChevronRight, Save, HelpCircle, RefreshCcw, PowerOff } from 'lucide-react';
+import { Terminal, ChevronRight, Save, HelpCircle, RefreshCcw, PowerOff, Eye } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { LoginUIState } from '@/app/page';
+import { QuickColorDialog, colorMap, colorCycle } from './quick-color-dialog';
+import { availableCommands, specialCommands } from './command-list';
 
 interface CommandDialogProps {
   open: boolean;
@@ -16,6 +19,8 @@ interface CommandDialogProps {
   onHackEffectToggle: (isActive: boolean) => void;
   uiState: LoginUIState;
   setUiState: React.Dispatch<React.SetStateAction<LoginUIState>>;
+  isLoginBlocked: boolean;
+  setIsLoginBlocked: (isBlocked: boolean) => void;
 }
 
 interface LogEntry {
@@ -23,49 +28,16 @@ interface LogEntry {
   text: string;
 }
 
-const colorMap: { [key: string]: string } = {
-    blue: '221.2 83.2% 53.3%',
-    green: '142.1 76.2% 36.3%',
-    red: '0 84.2% 60.2%',
-    purple: '262.1 83.3% 57.8%',
-    orange: '24.6 95% 53.1%',
-    yellow: '47.9 95.8% 53.1%',
-    default: '262.1 83.3% 57.8%',
-};
-const colorCycle = Object.keys(colorMap).filter(c => c !== 'default');
-
-const availableCommands = [
-    { command: 'help', description: 'Displays this list of available commands.' },
-    { command: 'swapcolor', description: 'Cycles through available UI colors.' },
-    { command: 'hackeffect', description: 'Toggles a visual hacking effect on the screen.' },
-    { command: 'showhidecommand', description: 'Reveals hidden special commands.' },
-    { command: 'set_title [text]', description: 'Change the login form title.' },
-    { command: 'set_subtitle [text]', description: 'Change the login form subtitle.' },
-    { command: 'set_button [text]', description: 'Change the login button text.' },
-    { command: 'theme_dark', description: 'Switch login panel to dark mode.' },
-    { command: 'theme_light', description: 'Switch login panel to light mode.' },
-    { command: 'set_text_color [color]', description: 'Change login panel text color (e.g., #FFFFFF).'},
-    { command: 'login_shake', description: 'Shake login form (on wrong password).'},
-    { command: 'login_glow [color]', description: 'Glow effect on login panel (e.g., #FFFFFF).'},
-    { command: 'toast_message [text]', description: 'Show a toast notification.'},
-    { command: 'confetti', description: 'Launch confetti effect.'},
-    { command: 'secret_message', description: 'Show hidden Easter egg message.'},
-];
-
-const specialCommands = [
-     { command: 'matrix', description: 'Initiates matrix rain effect (not implemented).'},
-     { command: 'godmode', description: 'Unlocks all features (not implemented).'},
-]
-
-
-export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState, setUiState }: CommandDialogProps) {
+export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked }: CommandDialogProps) {
   const { toast } = useToast();
+  const router = useRouter();
   const [command, setCommand] = useState('');
   const [logs, setLogs] = useState<LogEntry[]>([
       {type: 'response', text: 'URA Command Interface. Type "help" for assistance.'}
   ]);
   const [colorIndex, setColorIndex] = useState(0);
   const originalPrimaryColor = useRef<string | null>(null);
+  const [isQuickColorOpen, setIsQuickColorOpen] = useState(false);
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -86,6 +58,27 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
                 `\n- ${cmd.command}: ${cmd.description}`
             ).join('');
             setLogs(prev => [...prev, { type: 'help', text: `Available Commands:${helpText}` }]);
+            break;
+        }
+        case 'viewitem': {
+            router.push('/commands');
+            setLogs(prev => [...prev, { type: 'response', text: `Opening commands list page...` }]);
+            onOpenChange(false);
+            break;
+        }
+        case 'blockitem': {
+            setIsLoginBlocked(true);
+            setLogs(prev => [...prev, { type: 'response', text: `Login form has been blocked.`}]);
+            break;
+        }
+        case 'unblockitem': {
+            setIsLoginBlocked(false);
+            setLogs(prev => [...prev, { type: 'response', text: `Login form has been unblocked.`}]);
+            break;
+        }
+        case 'setquick': {
+            setIsQuickColorOpen(true);
+            setLogs(prev => [...prev, { type: 'response', text: `Quick color picker opened.`}]);
             break;
         }
         case 'swapcolor': {
@@ -196,6 +189,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
         document.documentElement.style.setProperty('--primary', originalPrimaryColor.current);
       }
       onHackEffectToggle(false);
+      setIsLoginBlocked(false);
       setLogs([{type: 'response', text: 'UI has been reset to default state.'}]);
       setUiState({
         title: 'Login',
@@ -243,6 +237,7 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
 
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-black/80 text-white border-primary/30 backdrop-blur-lg sm:max-w-[625px] flex flex-col h-[70vh] shadow-primary/20 shadow-2xl">
         <DialogHeader>
@@ -285,6 +280,10 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
                 className="bg-black/30 border-primary/20 focus:ring-primary/80 pl-[100px] font-mono"
             />
           </div>
+          <Button type="button" onClick={() => router.push('/commands')} variant="secondary" size="icon">
+            <Eye className="h-4 w-4" />
+            <span className="sr-only">View All Commands</span>
+          </Button>
            <Button type="button" onClick={handleReset} variant="secondary" size="icon">
             <RefreshCcw className="h-4 w-4"/>
             <span className="sr-only">Reset</span>
@@ -296,6 +295,8 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
         </div>
       </DialogContent>
     </Dialog>
+    <QuickColorDialog open={isQuickColorOpen} onOpenChange={setIsQuickColorOpen} setColorIndex={setColorIndex} />
+    </>
   );
 }
 

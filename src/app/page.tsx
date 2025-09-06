@@ -60,6 +60,7 @@ export default function Home() {
   const [quickLoginUser, setQuickLoginUser] = useState<UserData | null>(null);
   const [autoOpen, setAutoOpen] = useState(false);
   const [isHackEffectActive, setIsHackEffectActive] = useState(false);
+  const [isLoginBlocked, setIsLoginBlocked] = useState(false);
 
   const [loginUiState, setLoginUiState] = useState<LoginUIState>({
     title: 'Login',
@@ -180,6 +181,8 @@ export default function Home() {
                       onHackEffectToggle={setIsHackEffectActive}
                       uiState={loginUiState}
                       setUiState={setLoginUiState}
+                      isLoginBlocked={isLoginBlocked}
+                      setIsLoginBlocked={setIsLoginBlocked}
                     />
                 </div>
                 <div className="absolute w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">

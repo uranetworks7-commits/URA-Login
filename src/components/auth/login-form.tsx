@@ -40,6 +40,8 @@ interface LoginFormProps {
   onHackEffectToggle: (isActive: boolean) => void;
   uiState: LoginUIState;
   setUiState: React.Dispatch<React.SetStateAction<LoginUIState>>;
+  isLoginBlocked: boolean;
+  setIsLoginBlocked: (isBlocked: boolean) => void;
 }
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -78,7 +80,7 @@ const keyframes = `
 `;
 
 
-export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, uiState, setUiState }: LoginFormProps) {
+export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked }: LoginFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -110,6 +112,14 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
 
 
   async function onSubmit(data: LoginFormValues) {
+    if (isLoginBlocked) {
+        toast({
+            variant: 'destructive',
+            title: 'Login Blocked',
+            description: 'Login is currently blocked by a CMD command. Use "unblockitem" to enable it.',
+        });
+        return;
+    }
     if (!isInternetAllowed) {
         toast({
             variant: 'destructive',
@@ -343,7 +353,15 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
         </form>
       </Form>
     </Card>
-    <CommandDialog open={isCmdOpen} onOpenChange={setIsCmdOpen} onHackEffectToggle={onHackEffectToggle} uiState={uiState} setUiState={setUiState} />
+    <CommandDialog 
+        open={isCmdOpen} 
+        onOpenChange={setIsCmdOpen} 
+        onHackEffectToggle={onHackEffectToggle} 
+        uiState={uiState} 
+        setUiState={setUiState}
+        isLoginBlocked={isLoginBlocked}
+        setIsLoginBlocked={setIsLoginBlocked}
+     />
     </>
   );
 }
