@@ -61,7 +61,7 @@ export default function CommandsPage() {
                             </Button>
                         </div>
                     </CardHeader>
-                    <CardContent className="h-[350px]">
+                    <CardContent>
                         <div className="space-y-4">
                             {currentCommands.map((cmd) => (
                                 <div key={cmd.command} className="flex items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
