@@ -14,6 +14,7 @@ import { BannedScreen } from '@/components/auth/banned-screen';
 import { PermissionNotice } from '@/components/auth/permission-notice';
 import { ServerErrorScreen } from '@/components/auth/server-error-screen';
 import { QuickLoginForm } from '@/components/auth/quick-login-form';
+import { colorMap } from '@/components/auth/quick-color-dialog';
 
 type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError';
 type AuthMode = 'login' | 'signup';
@@ -49,6 +50,13 @@ const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, on
   );
 };
 
+const initialLoginUiState: LoginUIState = {
+    title: 'Login',
+    subtitle: 'Enter your credentials to access your account.',
+    buttonText: 'Login',
+    theme: 'dark',
+    shake: false,
+};
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('loading');
@@ -63,27 +71,57 @@ export default function Home() {
   const [isLoginBlocked, setIsLoginBlocked] = useState(false);
   const [loadingTitle, setLoadingTitle] = useState('URA Networks 2.0');
 
-  const [loginUiState, setLoginUiState] = useState<LoginUIState>({
-    title: 'Login',
-    subtitle: 'Enter your credentials to access your account.',
-    buttonText: 'Login',
-    theme: 'dark',
-    shake: false,
-  });
+  const [loginUiState, setLoginUiState] = useState<LoginUIState>(initialLoginUiState);
   
+  const handleSetLoginUiState = (newUiState: React.SetStateAction<LoginUIState>) => {
+    setLoginUiState(prevState => {
+        const newState = typeof newUiState === 'function' ? newUiState(prevState) : newUiState;
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('loginUiState', JSON.stringify(newState));
+        }
+        return newState;
+    });
+  }
+
   const handleSetName = (newName: string) => {
     setLoadingTitle(newName);
-    setLoginUiState(prev => ({ ...prev, title: newName }));
+    handleSetLoginUiState(prev => ({ ...prev, title: newName }));
+     if (typeof window !== 'undefined') {
+        localStorage.setItem('loadingTitle', newName);
+    }
   };
 
   const setShake = (shake: boolean) => {
-    setLoginUiState(prev => ({...prev, shake}));
+    handleSetLoginUiState(prev => ({...prev, shake}));
   }
-
 
   useEffect(() => {
     setIsClient(true);
     const noticeAgreed = localStorage.getItem('permissionNoticeAgreed');
+    
+    // Restore state from localStorage
+    const savedLoginUiState = localStorage.getItem('loginUiState');
+    if (savedLoginUiState) {
+        setLoginUiState(JSON.parse(savedLoginUiState));
+    }
+    const savedLoadingTitle = localStorage.getItem('loadingTitle');
+    if (savedLoadingTitle) {
+        setLoadingTitle(savedLoadingTitle);
+    }
+    const savedLoginBlocked = localStorage.getItem('isLoginBlocked');
+    if (savedLoginBlocked) {
+        setIsLoginBlocked(JSON.parse(savedLoginBlocked));
+    }
+     const savedHackEffect = localStorage.getItem('isHackEffectActive');
+    if (savedHackEffect) {
+        setIsHackEffectActive(JSON.parse(savedHackEffect));
+    }
+    const savedPrimaryColor = localStorage.getItem('primaryColor');
+    if (savedPrimaryColor && colorMap[savedPrimaryColor]) {
+        document.documentElement.style.setProperty('--primary', colorMap[savedPrimaryColor]);
+    }
+
+
     if (!noticeAgreed) {
         setAppState('permission');
     } else {
@@ -184,12 +222,19 @@ export default function Home() {
                     <LoginForm 
                       onSignupClick={toggleAuthMode} 
                       onLoginResult={handleLoginResult} 
-                      onHackEffectToggle={setIsHackEffectActive}
+                      onHackEffectToggle={(active) => {
+                          setIsHackEffectActive(active);
+                          localStorage.setItem('isHackEffectActive', JSON.stringify(active));
+                      }}
                       uiState={loginUiState}
-                      setUiState={setLoginUiState}
+                      setUiState={handleSetLoginUiState}
                       isLoginBlocked={isLoginBlocked}
-                      setIsLoginBlocked={setIsLoginBlocked}
+                      setIsLoginBlocked={(blocked) => {
+                          setIsLoginBlocked(blocked);
+                          localStorage.setItem('isLoginBlocked', JSON.stringify(blocked));
+                      }}
                       setLoadingTitle={handleSetName}
+                      initialLoginUiState={initialLoginUiState}
                     />
                 </div>
                 <div className="absolute w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">

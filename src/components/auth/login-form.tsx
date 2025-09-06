@@ -43,6 +43,7 @@ interface LoginFormProps {
   isLoginBlocked: boolean;
   setIsLoginBlocked: (isBlocked: boolean) => void;
   setLoadingTitle: (title: string) => void;
+  initialLoginUiState: LoginUIState;
 }
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -81,7 +82,7 @@ const keyframes = `
 `;
 
 
-export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked, setLoadingTitle }: LoginFormProps) {
+export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked, setLoadingTitle, initialLoginUiState }: LoginFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -363,6 +364,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
         isLoginBlocked={isLoginBlocked}
         setIsLoginBlocked={setIsLoginBlocked}
         setLoadingTitle={setLoadingTitle}
+        initialLoginUiState={initialLoginUiState}
      />
     </>
   );

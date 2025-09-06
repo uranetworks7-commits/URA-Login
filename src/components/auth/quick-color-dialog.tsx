@@ -24,6 +24,7 @@ export function QuickColorDialog({ open, onOpenChange, setColorIndex }: QuickCol
 
   const handleColorSelect = (colorName: string, index: number) => {
     document.documentElement.style.setProperty('--primary', colorMap[colorName]);
+    localStorage.setItem('primaryColor', colorName);
     setColorIndex(index);
     onOpenChange(false);
   };

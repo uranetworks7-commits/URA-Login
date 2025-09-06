@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Terminal, ChevronRight, Save, HelpCircle, RefreshCcw, PowerOff, Eye } from 'lucide-react';
+import { Terminal, ChevronRight, HelpCircle, RefreshCcw, PowerOff, Eye } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -23,6 +23,7 @@ interface CommandDialogProps {
   isLoginBlocked: boolean;
   setIsLoginBlocked: (isBlocked: boolean) => void;
   setLoadingTitle: (title: string) => void;
+  initialLoginUiState: LoginUIState;
 }
 
 interface LogEntry {
@@ -30,7 +31,7 @@ interface LogEntry {
   text: string;
 }
 
-export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked, setLoadingTitle }: CommandDialogProps) {
+export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked, setLoadingTitle, initialLoginUiState }: CommandDialogProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [command, setCommand] = useState('');
@@ -88,15 +89,14 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
             const nextColorIndex = (colorIndex + 1) % colorCycle.length;
             const nextColorName = colorCycle[nextColorIndex];
             document.documentElement.style.setProperty('--primary', colorMap[nextColorName]);
+            localStorage.setItem('primaryColor', nextColorName);
             setLogs(prev => [...prev, { type: 'response', text: `UI primary color changed to ${nextColorName}.` }]);
             setColorIndex(nextColorIndex);
             break;
         }
         case 'hackeffect': {
-            onHackEffectToggle(prev => {
-                setLogs(prevLogs => [...prevLogs, { type: 'response', text: `Hack effect ${!prev ? 'activated' : 'deactivated'}.` }]);
-                return !prev;
-            });
+            onHackEffectToggle(!document.body.classList.contains('hack-effect'));
+            setLogs(prevLogs => [...prevLogs, { type: 'response', text: `Hack effect ${!document.body.classList.contains('hack-effect') ? 'activated' : 'deactivated'}.` }]);
             break;
         }
         case 'showhidecommand': {
@@ -202,22 +202,27 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
   }
 
   const handleReset = () => {
+      // Clear localStorage
+      localStorage.removeItem('loginUiState');
+      localStorage.removeItem('loadingTitle');
+      localStorage.removeItem('isLoginBlocked');
+      localStorage.removeItem('isHackEffectActive');
+      localStorage.removeItem('primaryColor');
+
+      // Reset state
+      setUiState(initialLoginUiState);
+      setLoadingTitle('URA Networks 2.0');
+      setIsLoginBlocked(false);
+      onHackEffectToggle(false);
+
       if (originalPrimaryColor.current) {
         document.documentElement.style.setProperty('--primary', originalPrimaryColor.current);
+      } else {
+        document.documentElement.style.setProperty('--primary', colorMap['default']);
       }
-      onHackEffectToggle(false);
-      setIsLoginBlocked(false);
-      setLoadingTitle('URA Networks 2.0');
+      
       setLogs([{type: 'response', text: 'UI has been reset to default state.'}]);
-      setUiState({
-        title: 'Login',
-        subtitle: 'Enter your credentials to access your account.',
-        buttonText: 'Login',
-        theme: 'dark',
-        shake: false,
-        textColor: undefined,
-        glowColor: undefined,
-      });
+      
       toast({
           title: 'UI Reset',
           description: 'All CMD modifications have been reverted.'
@@ -239,10 +244,8 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
             originalPrimaryColor.current = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
         }
         setTimeout(() => inputRef.current?.focus(), 100);
-    } else {
-        onHackEffectToggle(false); // Turn off effect when closing dialog
     }
-  }, [open, onHackEffectToggle]);
+  }, [open]);
   
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -253,6 +256,11 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
     }
   }, [logs]);
 
+  useEffect(() => {
+    const savedColorName = localStorage.getItem('primaryColor') || 'default';
+    const initialColorIndex = colorCycle.indexOf(savedColorName);
+    setColorIndex(initialColorIndex > -1 ? initialColorIndex : 0);
+  }, []);
 
   return (
     <>
