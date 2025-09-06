@@ -7,6 +7,7 @@ import { loginUser, type UserData, type LoginResult } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface QuickLoginFormProps {
   user: UserData;
@@ -48,7 +49,6 @@ export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }
       });
       onExit();
     } finally {
-      // Don't set submitting to false if it was an auto-open, as the component will unmount
       if (!autoOpen) {
         setIsSubmitting(false);
       }
@@ -66,7 +66,7 @@ export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }
     if (autoOpen) {
       timerRef.current = setTimeout(() => {
         handleQuickLogin();
-      }, 1500);
+      }, 2000); // Increased delay for better UX
       return () => {
         if(timerRef.current) {
             clearTimeout(timerRef.current)
@@ -77,35 +77,44 @@ export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-lg bg-black/50 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
-            <CardHeader className="items-center text-center">
-                <div className="p-4 rounded-full bg-primary/20 border-2 border-primary">
-                    <User className="h-12 w-12 text-primary" />
+        <Card className={cn(
+            "w-full max-w-sm rounded-2xl border backdrop-blur-2xl transition-all duration-300",
+            "border-white/20 bg-white/10 shadow-2xl shadow-black/50"
+        )}>
+            <CardHeader className="items-center text-center pt-8">
+                <div className="p-4 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border border-white/20 shadow-lg">
+                    <User className="h-12 w-12 text-white/90" />
                 </div>
-                <CardTitle className="text-2xl text-primary font-bold pt-4">{user.username}</CardTitle>
-                <CardDescription className="text-white/70 pt-1">
-                  {isSubmitting && autoOpen ? "Automatically logging in..." : "Welcome back!"}
+                <CardTitle className="text-3xl font-bold text-white tracking-wider pt-4">{user.username}</CardTitle>
+                <CardDescription className="text-white/70 pt-1 text-sm font-light">
+                  {isSubmitting && autoOpen ? "Automatically logging in..." : "Welcome back"}
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-                 <Button onClick={handleQuickLogin} className="w-full font-semibold" size="lg" disabled={isSubmitting}>
+            <CardContent className="flex flex-col gap-4 px-8 pb-6">
+                 <Button onClick={handleQuickLogin} className={cn(
+                     "w-full font-bold text-base text-white transition-all duration-300",
+                     "bg-gradient-to-r from-primary/80 to-primary/60 hover:from-primary hover:to-primary/80",
+                     "shadow-lg shadow-primary/30 hover:shadow-primary/50",
+                     "border border-primary/50 hover:border-primary",
+                     "h-12 rounded-lg"
+                    )} size="lg" disabled={isSubmitting}>
                     {isSubmitting ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     ) : (
-                        <LogIn className="mr-2 h-4 w-4" />
+                        <LogIn className="mr-2 h-5 w-5" />
                     )}
-                    Login as {user.username}
+                    Continue
                 </Button>
                 {isSubmitting && autoOpen && (
-                    <Button onClick={handleCancel} variant="destructive" className="w-full font-semibold" size="lg">
+                    <Button onClick={handleCancel} variant="ghost" className="w-full font-semibold text-white/70 hover:text-white hover:bg-white/10 h-12 rounded-lg" size="lg">
                         <X className="mr-2 h-4 w-4" />
-                        Cancel
+                        Cancel Auto Login
                     </Button>
                 )}
             </CardContent>
-            <CardFooter>
-                 <Button variant="link" type="button" onClick={onExit} className="w-full text-white/60 hover:text-white" disabled={isSubmitting && autoOpen}>
-                    Not you? Log in with another account
+            <CardFooter className="pb-8">
+                 <Button variant="link" type="button" onClick={onExit} className="w-full text-white/60 hover:text-white text-xs font-light" disabled={isSubmitting && autoOpen}>
+                    Not you? Login with another account
                 </Button>
             </CardFooter>
         </Card>
