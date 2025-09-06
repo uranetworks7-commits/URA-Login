@@ -154,7 +154,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
 
   return (
     <>
-    <Card className="w-full max-w-lg bg-black/50 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
+    <Card className="w-full max-w-lg rounded-2xl border backdrop-blur-2xl border-white/10 bg-white/5 shadow-2xl shadow-black/20 text-white">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader className="text-center relative">
