@@ -46,8 +46,19 @@ export default function CommandsPage() {
                     <CardHeader className="text-center">
                         <CardTitle className="text-3xl text-primary font-bold">Available CMD Commands</CardTitle>
                         <CardDescription className="text-white/70 pt-2">Here is a list of all commands you can use in the CMD interface.</CardDescription>
+                        <div className="flex items-center justify-center w-full space-x-4 pt-4">
+                            <Button onClick={handlePrevPage} disabled={currentPage === 1} variant="outline" className="bg-transparent hover:bg-white/10">
+                                <ArrowLeft className="mr-2 h-4 w-4"/>
+                                Previous
+                            </Button>
+                            <span className="font-mono text-sm">Page {currentPage} of {totalPages}</span>
+                             <Button onClick={handleNextPage} disabled={currentPage === totalPages} variant="outline" className="bg-transparent hover:bg-white/10">
+                                Next
+                                <ArrowRight className="ml-2 h-4 w-4"/>
+                            </Button>
+                        </div>
                     </CardHeader>
-                    <CardContent className="h-[380px]">
+                    <CardContent className="h-[350px]">
                         <div className="space-y-4">
                             {currentCommands.map((cmd) => (
                                 <div key={cmd.command} className="flex items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
@@ -68,18 +79,7 @@ export default function CommandsPage() {
                         </div>
                     </CardContent>
                      <CardFooter className="flex-col gap-4 pt-4">
-                        <div className="flex items-center justify-center w-full space-x-4">
-                            <Button onClick={handlePrevPage} disabled={currentPage === 1} variant="outline" className="bg-transparent hover:bg-white/10">
-                                <ArrowLeft className="mr-2 h-4 w-4"/>
-                                Previous
-                            </Button>
-                            <span className="font-mono text-sm">Page {currentPage} of {totalPages}</span>
-                             <Button onClick={handleNextPage} disabled={currentPage === totalPages} variant="outline" className="bg-transparent hover:bg-white/10">
-                                Next
-                                <ArrowRight className="ml-2 h-4 w-4"/>
-                            </Button>
-                        </div>
-                         <Button variant="link" type="button" onClick={() => router.push('/')} className="text-white/80 hover:text-white mt-4">
+                         <Button variant="link" type="button" onClick={() => router.push('/')} className="text-white/80 hover:text-white">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Login
                         </Button>
