@@ -108,7 +108,7 @@ export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }
                 {isSubmitting && autoOpen && (
                     <Button onClick={handleCancel} variant="ghost" className="w-full font-semibold text-white/70 hover:text-white hover:bg-white/10 h-12 rounded-lg" size="lg">
                         <X className="mr-2 h-4 w-4" />
-                        Cancel Auto Login
+                        Cancel
                     </Button>
                 )}
             </CardContent>
