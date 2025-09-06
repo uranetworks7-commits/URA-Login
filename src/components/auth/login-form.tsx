@@ -21,6 +21,7 @@ import { CommandDialog } from './command-dialog';
 import { SettingsPopover } from './settings-popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TermsDialog } from './terms-dialog';
+import { cn } from '@/lib/utils';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -153,7 +154,10 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
 
   return (
     <>
-    <Card className="w-full max-w-lg bg-black/50 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
+    <Card className={cn(
+            "w-full max-w-lg rounded-2xl border backdrop-blur-2xl transition-all duration-300",
+            "border-white/20 bg-white/10 shadow-2xl shadow-black/50"
+        )}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader className="text-center relative">
@@ -169,9 +173,9 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Your Username</FormLabel>
+                  <FormLabel className="text-white/80">Your Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="your_username" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" />
+                    <Input placeholder="your_username" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80 text-white" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -182,9 +186,9 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Your Email Id</FormLabel>
+                  <FormLabel className="text-white/80">Your Email Id</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="m@example.com" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" />
+                    <Input type="email" placeholder="m@example.com" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80 text-white" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -192,7 +196,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
             />
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30">
+                <Button variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30 text-white">
                     <Sparkles className="mr-2 h-4 w-4" />
                     Aura Access
                 </Button>
@@ -243,7 +247,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                       )}
                     />
                     <Separator className="my-1 bg-white/20" />
-                    <Button variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => setIsCmdOpen(true)}>
+                    <Button variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30 text-white" onClick={() => setIsCmdOpen(true)}>
                         <Terminal className="mr-2 h-4 w-4" />
                         Open CMD
                     </Button>
@@ -251,11 +255,11 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
               </PopoverContent>
             </Popover>
             <div className="grid grid-cols-2 gap-4">
-              <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={() => toast({ title: 'Please Create A GitHub Account' })}>
+              <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30 text-white" onClick={() => toast({ title: 'Please Create A GitHub Account' })}>
                 <Github className="mr-2 h-4 w-4" />
                 GitHub
               </Button>
-                <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30" onClick={handleGoogleClick}>
+                <Button type="button" variant="outline" className="w-full bg-black/20 border-white/20 hover:bg-black/30 text-white" onClick={handleGoogleClick}>
                     <GoogleIcon className="mr-2 h-4 w-4" />
                     Google
                 </Button>
@@ -278,7 +282,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                   />
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="bg-transparent border-none hover:bg-white/10 rounded-full h-8 w-8">
+                        <Button variant="ghost" size="icon" className="text-white/80 bg-transparent border-none hover:bg-white/10 rounded-full h-8 w-8">
                             <MoreVertical className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
@@ -313,3 +317,5 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
     </>
   );
 }
+
+    
