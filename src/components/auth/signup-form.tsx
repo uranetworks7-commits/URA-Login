@@ -17,7 +17,10 @@ import { TermsDialog } from './terms-dialog';
 import { Separator } from '@/components/ui/separator';
 
 const signupSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters').max(20).regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores.'),
+  username: z.string()
+    .transform(val => val.toLowerCase())
+    .refine(val => val.length >= 2, { message: 'Username must be at least 2 characters.'})
+    .refine(val => val.includes('@'), { message: 'Username must contain the @ symbol.' }),
   email: z.string().email('Invalid email address. The @ symbol is mandatory.'),
   captcha: z.string().min(1, 'Captcha is required'),
   terms: z.boolean().refine(val => val === true, { message: 'You must accept the terms and conditions.' }),
