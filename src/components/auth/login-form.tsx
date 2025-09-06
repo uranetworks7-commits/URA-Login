@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
-  email: z.string().email('Invalid email address. The @ symbol is mandatory.').min(1, 'Email is required'),
+  email: z.string().min(1, 'Email is required'),
   rememberMe: z.boolean().default(false),
   autoOpener: z.boolean().default(false),
   terms: z.boolean().default(true),
@@ -154,10 +154,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
 
   return (
     <>
-    <Card className={cn(
-            "w-full max-w-lg rounded-2xl border backdrop-blur-2xl transition-all duration-300",
-            "border-white/20 bg-white/10 shadow-2xl shadow-black/50"
-        )}>
+    <Card className="w-full max-w-lg bg-black/50 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader className="text-center relative">
@@ -188,7 +185,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
                 <FormItem>
                   <FormLabel className="text-white/80">Your Email Id</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="m@example.com" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80 text-white" />
+                    <Input type="text" placeholder="m@example.com" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80 text-white" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -317,5 +314,3 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle }: 
     </>
   );
 }
-
-    
