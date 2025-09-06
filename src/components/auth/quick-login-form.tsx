@@ -87,7 +87,7 @@ export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }
                 </div>
                 <CardTitle className="text-3xl font-bold text-white tracking-wider pt-4">{user.username}</CardTitle>
                 <CardDescription className="text-white/70 pt-1 text-sm font-light">
-                  {isSubmitting && autoOpen ? "Automatically logging in..." : "Welcome back"}
+                  {isSubmitting && autoOpen ? "Welcome" : "Welcome back"}
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4 px-8 pb-6">
@@ -103,7 +103,7 @@ export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }
                     ) : (
                         <LogIn className="mr-2 h-5 w-5" />
                     )}
-                    Continue
+                    Logging in...
                 </Button>
                 {isSubmitting && autoOpen && (
                     <Button onClick={handleCancel} variant="ghost" className="w-full font-semibold text-white/70 hover:text-white hover:bg-white/10 h-12 rounded-lg" size="lg">
