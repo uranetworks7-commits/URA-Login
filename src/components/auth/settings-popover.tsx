@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Settings, Wifi, Bell, HardDrive, Share2, Smartphone, Zap } from 'lucide-react';
+import { Settings, Wifi, Bell, HardDrive, Share2, Smartphone } from 'lucide-react';
 
 interface SettingsPopoverProps {
     onInternetAccessChange: (isAllowed: boolean) => void;
@@ -23,7 +23,6 @@ export function SettingsPopover({ onInternetAccessChange }: SettingsPopoverProps
     const [isIpAllowed, setIsIpAllowed] = useState(() => getInitialState('permission:ip', true));
     const [isInternetAllowed, setIsInternetAllowed] = useState(() => getInitialState('permission:internet', true));
     const [isDeviceAllowed, setIsDeviceAllowed] = useState(() => getInitialState('permission:device', true));
-    const [isEmergencyMode, setIsEmergencyMode] = useState(() => getInitialState('emergencyMode', false));
 
     useEffect(() => {
         onInternetAccessChange(isInternetAllowed);
@@ -53,13 +52,6 @@ export function SettingsPopover({ onInternetAccessChange }: SettingsPopoverProps
                         </p>
                     </div>
                     <div className="grid gap-3">
-                        <div className="flex items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
-                            <Label htmlFor="emergency-mode" className="flex items-center gap-2 text-white/80 cursor-pointer text-sm">
-                                <Zap className="h-4 w-4 text-yellow-400" />
-                                Emergency Mode
-                            </Label>
-                            <Switch id="emergency-mode" checked={isEmergencyMode} onCheckedChange={createHandler(setIsEmergencyMode, 'emergencyMode')} />
-                        </div>
                         <div className="flex items-center justify-between rounded-lg bg-black/20 p-3 border border-white/20">
                             <Label htmlFor="notification-permission" className="flex items-center gap-2 text-white/80 cursor-pointer text-sm">
                                 <Bell className="h-4 w-4 text-primary" />

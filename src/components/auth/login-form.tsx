@@ -44,6 +44,8 @@ interface LoginFormProps {
   setIsLoginBlocked: (isBlocked: boolean) => void;
   setLoadingTitle: (title: string) => void;
   initialLoginUiState: LoginUIState;
+  isEmergencyMode: boolean;
+  setIsEmergencyMode: (isEmergency: boolean) => void;
 }
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -82,7 +84,7 @@ const keyframes = `
 `;
 
 
-export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked, setLoadingTitle: handleSetName, initialLoginUiState }: LoginFormProps) {
+export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked, setLoadingTitle: handleSetName, initialLoginUiState, isEmergencyMode, setIsEmergencyMode }: LoginFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -288,6 +290,15 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
                         </FormItem>
                       )}
                     />
+                    <FormItem className={cn("flex flex-row items-center justify-between rounded-lg p-3 border", uiState.theme === 'dark' ? "bg-black/20 border-white/20" : "bg-white/20 border-black/20")}>
+                        <FormLabel className={cn("flex items-center gap-2 cursor-pointer text-sm", uiState.theme === 'dark' ? 'text-white/80' : 'text-black/80')}>
+                            <Zap className="h-4 w-4 text-yellow-400" />
+                            Emergency Mode
+                        </FormLabel>
+                        <FormControl>
+                           <Switch checked={isEmergencyMode} onCheckedChange={setIsEmergencyMode} />
+                        </FormControl>
+                    </FormItem>
                     <Separator className={cn("my-1", uiState.theme === 'dark' ? 'bg-white/20' : 'bg-black/20')} />
                     <Button variant="outline" className={cn("w-full hover:bg-black/30", uiState.theme === 'dark' ? 'bg-black/20 border-white/20 text-white' : 'bg-white/20 border-black/20 text-black')} onClick={() => setIsCmdOpen(true)}>
                         <Terminal className="mr-2 h-4 w-4" />

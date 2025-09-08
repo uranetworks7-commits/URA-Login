@@ -257,6 +257,11 @@ export default function Home() {
                       }}
                       setLoadingTitle={handleSetName}
                       initialLoginUiState={initialLoginUiState}
+                      isEmergencyMode={isEmergencyMode}
+                      setIsEmergencyMode={(isEmergency) => {
+                          setIsEmergencyMode(isEmergency);
+                          localStorage.setItem('emergencyMode', JSON.stringify(isEmergency));
+                      }}
                     />
                 </div>
                 <div className="absolute w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
