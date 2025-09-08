@@ -15,28 +15,31 @@ const DotLoading = () => (
 interface LoadingScreenProps {
     onComplete: () => void;
     title: string;
+    isEmergency?: boolean;
 }
 
-export function LoadingScreen({ onComplete, title }: LoadingScreenProps) {
+export function LoadingScreen({ onComplete, title, isEmergency = false }: LoadingScreenProps) {
   const [status, setStatus] = useState('Connecting to Server...');
   const [securityStatus, setSecurityStatus] = useState('');
+  
+  const speed = isEmergency ? 0.5 : 1;
 
   useEffect(() => {
     const timer1 = setTimeout(() => {
       setStatus('Connected to Server');
-    }, 1500);
+    }, 1500 * speed);
 
     const timer2 = setTimeout(() => {
       setSecurityStatus('Security Scaning:-');
-    }, 2000);
+    }, 2000 * speed);
 
     const timer3 = setTimeout(() => {
       setSecurityStatus('Security Check Completed');
-    }, 4000);
+    }, 4000 * speed);
 
     const finalTimer = setTimeout(() => {
       onComplete();
-    }, 5000);
+    }, 5000 * speed);
 
     return () => {
       clearTimeout(timer1);
@@ -44,7 +47,7 @@ export function LoadingScreen({ onComplete, title }: LoadingScreenProps) {
       clearTimeout(timer3);
       clearTimeout(finalTimer);
     };
-  }, [onComplete]);
+  }, [onComplete, speed]);
 
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center gap-8 bg-transparent text-white">

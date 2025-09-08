@@ -14,9 +14,10 @@ interface QuickLoginFormProps {
   onLoginResult: (result: LoginResult) => void;
   onExit: () => void;
   autoOpen?: boolean;
+  isEmergency?: boolean;
 }
 
-export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }: QuickLoginFormProps) {
+export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false, isEmergency = false }: QuickLoginFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(autoOpen);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -64,16 +65,17 @@ export function QuickLoginForm({ user, onLoginResult, onExit, autoOpen = false }
 
   useEffect(() => {
     if (autoOpen) {
+      const delay = isEmergency ? 1000 : 2000;
       timerRef.current = setTimeout(() => {
         handleQuickLogin();
-      }, 2000); // Increased delay for better UX
+      }, delay);
       return () => {
         if(timerRef.current) {
             clearTimeout(timerRef.current)
         };
       }
     }
-  }, [autoOpen]);
+  }, [autoOpen, isEmergency]);
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">

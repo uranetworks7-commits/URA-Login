@@ -15,6 +15,7 @@ import { PermissionNotice } from '@/components/auth/permission-notice';
 import { ServerErrorScreen } from '@/components/auth/server-error-screen';
 import { QuickLoginForm } from '@/components/auth/quick-login-form';
 import { colorMap } from '@/components/auth/quick-color-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError';
 type AuthMode = 'login' | 'signup';
@@ -70,6 +71,9 @@ export default function Home() {
   const [isHackEffectActive, setIsHackEffectActive] = useState(false);
   const [isLoginBlocked, setIsLoginBlocked] = useState(false);
   const [loadingTitle, setLoadingTitle] = useState('URA Networks 2.0');
+  const [isEmergencyMode, setIsEmergencyMode] = useState(false);
+  const { toast } = useToast();
+
 
   const [loginUiState, setLoginUiState] = useState<LoginUIState>(initialLoginUiState);
   
@@ -120,14 +124,32 @@ export default function Home() {
     if (savedPrimaryColor && colorMap[savedPrimaryColor]) {
         document.documentElement.style.setProperty('--primary', colorMap[savedPrimaryColor]);
     }
+    
+    const emergencyMode = localStorage.getItem('emergencyMode') === 'true';
+    setIsEmergencyMode(emergencyMode);
 
+    if (emergencyMode) {
+        toast({
+            title: '🚨 Emergency Mode is On',
+            description: 'Animations and logins are accelerated.',
+            action: (
+                <Button variant="secondary" size="sm" onClick={() => {
+                    localStorage.setItem('emergencyMode', 'false');
+                    setIsEmergencyMode(false);
+                    toast({ description: "Emergency mode disabled."});
+                }}>
+                    Turn Off
+                </Button>
+            )
+        });
+    }
 
     if (!noticeAgreed) {
         setAppState('permission');
     } else {
         setAppState('loading');
     }
-  }, []);
+  }, [toast]);
 
   const handlePermissionAgree = () => {
     localStorage.setItem('permissionNoticeAgreed', 'true');
@@ -211,9 +233,9 @@ export default function Home() {
       case 'permission':
         return <PermissionNotice onAgree={handlePermissionAgree} />;
       case 'loading':
-        return <LoadingScreen onComplete={handleLoadingComplete} title={loadingTitle} />;
+        return <LoadingScreen onComplete={handleLoadingComplete} title={loadingTitle} isEmergency={isEmergencyMode} />;
       case 'quickLogin':
-        return quickLoginUser && <QuickLoginForm user={quickLoginUser} onLoginResult={handleLoginResult} onExit={handleExitQuickLogin} autoOpen={autoOpen} />;
+        return quickLoginUser && <QuickLoginForm user={quickLoginUser} onLoginResult={handleLoginResult} onExit={handleExitQuickLogin} autoOpen={autoOpen} isEmergency={isEmergencyMode} />;
       case 'auth':
         return (
           <div className="flex min-h-screen items-start justify-center p-4 pt-16 [perspective:1000px]">
@@ -255,7 +277,7 @@ export default function Home() {
         return <ServerErrorScreen />;
       default:
         // Fallback to loading screen
-        return <LoadingScreen onComplete={handleLoadingComplete} title={loadingTitle} />;
+        return <LoadingScreen onComplete={handleLoadingComplete} title={loadingTitle} isEmergency={isEmergencyMode} />;
     }
   };
 
