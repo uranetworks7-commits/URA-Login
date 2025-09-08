@@ -16,6 +16,7 @@ import { ServerErrorScreen } from '@/components/auth/server-error-screen';
 import { QuickLoginForm } from '@/components/auth/quick-login-form';
 import { colorMap } from '@/components/auth/quick-color-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { EmergencyBanner } from '@/components/auth/emergency-banner';
 
 type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError';
 type AuthMode = 'login' | 'signup';
@@ -128,28 +129,12 @@ export default function Home() {
     const emergencyMode = localStorage.getItem('emergencyMode') === 'true';
     setIsEmergencyMode(emergencyMode);
 
-    if (emergencyMode) {
-        toast({
-            title: '🚨 Emergency Mode is On',
-            description: 'Animations and logins are accelerated.',
-            action: (
-                <Button variant="secondary" size="sm" onClick={() => {
-                    localStorage.setItem('emergencyMode', 'false');
-                    setIsEmergencyMode(false);
-                    toast({ description: "Emergency mode disabled."});
-                }}>
-                    Turn Off
-                </Button>
-            )
-        });
-    }
-
     if (!noticeAgreed) {
         setAppState('permission');
     } else {
         setAppState('loading');
     }
-  }, [toast]);
+  }, []);
 
   const handlePermissionAgree = () => {
     localStorage.setItem('permissionNoticeAgreed', 'true');
@@ -261,6 +246,9 @@ export default function Home() {
                       setIsEmergencyMode={(isEmergency) => {
                           setIsEmergencyMode(isEmergency);
                           localStorage.setItem('emergencyMode', JSON.stringify(isEmergency));
+                          if (!isEmergency) {
+                            toast({ description: "Emergency mode disabled."});
+                          }
                       }}
                     />
                 </div>
@@ -290,6 +278,15 @@ export default function Home() {
   return (
     <main className={cn("relative flex min-h-screen flex-col items-center justify-center", { 'hack-effect': isHackEffectActive })}>
       <BackgroundImage />
+       {isClient && isEmergencyMode && (
+          <EmergencyBanner 
+            onTurnOff={() => {
+              setIsEmergencyMode(false);
+              localStorage.setItem('emergencyMode', 'false');
+              toast({ description: "Emergency mode disabled."});
+            }} 
+          />
+        )}
       <div className="relative z-10 w-full">
         <CurrentScreen />
       </div>
