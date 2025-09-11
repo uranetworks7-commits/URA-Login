@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { FC } from 'react';
@@ -91,8 +92,7 @@ export default function Home() {
 
   const handleSetName = (newName: string) => {
     setLoadingTitle(newName);
-    handleSetLoginUiState(prev => ({ ...prev, title: newName }));
-     if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
         localStorage.setItem('loadingTitle', newName);
     }
   };
@@ -299,3 +299,5 @@ export default function Home() {
     </main>
   );
 }
+
+    
