@@ -212,14 +212,12 @@ export function CommandDialog({ open, onOpenChange, onHackEffectToggle, uiState,
   const handleReset = () => {
       // Clear localStorage
       localStorage.removeItem('loginUiState');
-      localStorage.removeItem('loadingTitle');
       localStorage.removeItem('isLoginBlocked');
       localStorage.removeItem('isHackEffectActive');
       localStorage.removeItem('primaryColor');
 
       // Reset state
       setUiState(initialLoginUiState);
-      setLoadingTitle("URA Networks 2.0");
       setIsLoginBlocked(false);
       onHackEffectToggle(false);
 

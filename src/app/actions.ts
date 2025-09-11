@@ -129,31 +129,6 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         case 1:
             return { success: false, message: 'This account is pending for approval.', status: 'pending' };
         case 2:
-            // Security Check
-            const activity = `User ${username} logged in from a new device.`;
-            const securityInput: SecuritySystemInput = { username, email, activityLog: activity };
-            const securityResult = await securitySystemCheck(securityInput);
-
-            if (securityResult.isBanned) {
-                const banReason = securityResult.banReason || 'Violation of terms';
-                const banDuration = securityResult.banDuration || 'Permanent';
-                const bannedAt = new Date().toISOString();
-                let status = 3; // Permanent
-                let unbanAt;
-
-                if (banDuration === '24 Hours') {
-                    status = 4;
-                    unbanAt = new Date(bannedAt).getTime() + (24 * 60 * 60 * 1000);
-                } else if (banDuration === '7 Days') {
-                    status = 5;
-                    unbanAt = new Date(bannedAt).getTime() + (7 * 24 * 60 * 60 * 1000);
-                }
-                
-                await update(userRef, { status, banReason, banDuration, bannedAt, unbanAt });
-
-                return { success: false, message: `Your account is ${banDuration} banned.`, status: 'banned', data: { username, banReason, banDuration, unbanAt } };
-            }
-
             return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
         case 3:
             return { success: false, message: 'Your account is permanently banned.', status: 'banned', data: { username, banReason: userData.banReason || 'Violation of terms', banDuration: 'Permanent' } };

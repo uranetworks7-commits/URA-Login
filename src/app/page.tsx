@@ -254,9 +254,6 @@ export default function Home() {
                       setIsEmergencyMode={(isEmergency) => {
                           setIsEmergencyMode(isEmergency);
                           localStorage.setItem('emergencyMode', JSON.stringify(isEmergency));
-                          if (!isEmergency) {
-                            toast({ description: "Emergency mode disabled."});
-                          }
                       }}
                     />
                 </div>
@@ -293,7 +290,6 @@ export default function Home() {
             onTurnOff={() => {
               setIsEmergencyMode(false);
               localStorage.setItem('emergencyMode', 'false');
-              toast({ description: "Emergency mode disabled."});
             }} 
           />
         )}
