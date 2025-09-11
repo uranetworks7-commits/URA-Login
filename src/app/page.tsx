@@ -17,8 +17,9 @@ import { QuickLoginForm } from '@/components/auth/quick-login-form';
 import { colorMap } from '@/components/auth/quick-color-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { EmergencyBanner } from '@/components/auth/emergency-banner';
+import { AiLoaderScreen } from '@/components/auth/ai-loader-screen';
 
-type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError';
+type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError' | 'crashed';
 type AuthMode = 'login' | 'signup';
 
 export interface LoginUIState {
@@ -107,7 +108,11 @@ export default function Home() {
     // Restore state from localStorage
     const savedLoginUiState = localStorage.getItem('loginUiState');
     if (savedLoginUiState) {
-        setLoginUiState(JSON.parse(savedLoginUiState));
+        try {
+            setLoginUiState(JSON.parse(savedLoginUiState));
+        } catch (e) {
+            localStorage.removeItem('loginUiState');
+        }
     }
     const savedLoadingTitle = localStorage.getItem('loadingTitle');
     if (savedLoadingTitle) {
@@ -173,7 +178,10 @@ export default function Home() {
         setAppState('banned');
     } else if (result.status === 'error') {
         setAppState('serverError');
-    } else {
+    } else if (result.status === 'crashed') {
+        setAppState('crashed');
+    }
+    else {
         setShake(true);
         setTimeout(() => setShake(false), 500);
     }
@@ -268,6 +276,8 @@ export default function Home() {
         return bannedDetails && <BannedScreen details={bannedDetails} />;
       case 'serverError':
         return <ServerErrorScreen />;
+      case 'crashed':
+        return <AiLoaderScreen onRestart={() => { setAppState('loading'); }} />;
       default:
         // Fallback to loading screen
         return <LoadingScreen onComplete={handleLoadingComplete} title={loadingTitle} isEmergency={isEmergencyMode} />;
