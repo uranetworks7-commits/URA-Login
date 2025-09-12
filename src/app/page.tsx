@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { FC } from 'react';
@@ -34,9 +35,38 @@ export interface LoginUIState {
 }
 
 const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => {
+  const [message, setMessage] = useState('Login successful. Preparing your dashboard...');
+
   useEffect(() => {
     if (user) {
-      window.location.href = 'file:///android_asset/htmlapp/root/main.html';
+      const websites = [
+        'https://urabitcoins.netlify.app',
+        'https://openboxpro.netlify.app',
+        'https://chatproura.netlify.app'
+      ];
+      
+      setMessage('Syncing account with other services...');
+
+      // Create hidden iframes to ping the websites
+      websites.forEach(baseUrl => {
+        const url = `${baseUrl}?username=${encodeURIComponent(user.username)}`;
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        // Clean up the iframe after it has loaded
+        iframe.onload = () => {
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+          }, 1000);
+        };
+      });
+
+      // Redirect after a short delay to allow iframes to load
+      setTimeout(() => {
+        setMessage('Redirecting...');
+        window.location.href = 'file:///android_asset/htmlapp/root/main.html';
+      }, 3000); // 3-second delay
     }
   }, [user]);
 
@@ -47,7 +77,7 @@ const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, on
           <CardTitle className="text-center text-2xl text-primary">Redirecting...</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">
-          <p>Login successful. Preparing your dashboard...</p>
+          <p>{message}</p>
         </CardContent>
       </Card>
     </div>
@@ -92,9 +122,6 @@ export default function Home() {
 
   const handleSetName = (newName: string) => {
     setLoadingTitle(newName);
-    if (typeof window !== 'undefined') {
-        localStorage.setItem('loadingTitle', newName);
-    }
   };
 
   const setShake = (shake: boolean) => {
@@ -248,7 +275,12 @@ export default function Home() {
                           setIsLoginBlocked(blocked);
                           localStorage.setItem('isLoginBlocked', JSON.stringify(blocked));
                       }}
-                      setLoadingTitle={handleSetName}
+                      setLoadingTitle={(title) => {
+                        handleSetName(title);
+                        if(typeof window !== 'undefined') {
+                            localStorage.setItem('loadingTitle', title);
+                        }
+                      }}
                       initialLoginUiState={initialLoginUiState}
                       isEmergencyMode={isEmergencyMode}
                       setIsEmergencyMode={(isEmergency) => {
