@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, ServerCrash, Bot, ShieldAlert, RefreshCw } from 'lucide-react';
+import { Loader2, ServerCrash, Bot, ShieldAlert, RefreshCw, LifeBuoy } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { AnimatedTerminal } from './animated-terminal';
 
@@ -40,6 +40,10 @@ export function AiLoaderScreen({ onRestart }: { onRestart: () => void }) {
     const [gpu, setGpu] = useState(0);
     const [performance, setPerformance] = useState(0);
     const [runState, setRunState] = useState(0);
+
+    const handleCustomerCareClick = () => {
+        window.open('https://uranetworks7-commits.github.io/URA-CH-Help-line/', '_blank');
+    }
 
     useEffect(() => {
         if (stage === 'initial') {
@@ -95,6 +99,12 @@ export function AiLoaderScreen({ onRestart }: { onRestart: () => void }) {
                             <CardTitle className="text-2xl text-destructive">Application Crash</CardTitle>
                             <CardDescription className="text-destructive/80">The server is not responding.</CardDescription>
                         </CardHeader>
+                         <CardContent className="text-center">
+                            <Button variant="link" onClick={handleCustomerCareClick} className="text-blue-400 hover:text-blue-300">
+                                <LifeBuoy className="mr-2 h-4 w-4" />
+                                Customer Care
+                            </Button>
+                        </CardContent>
                     </Card>
                 );
             case 'aiIntro':
@@ -145,6 +155,10 @@ export function AiLoaderScreen({ onRestart }: { onRestart: () => void }) {
                             <p className="text-white/90">Sorry, I am unable to fix it. Please try again later.</p>
                             <Button variant="destructive" onClick={() => setStage('restarting')}>
                                 Retry
+                            </Button>
+                             <Button variant="link" onClick={handleCustomerCareClick} className="text-blue-400 hover:text-blue-300">
+                                <LifeBuoy className="mr-2 h-4 w-4" />
+                                Customer Care
                             </Button>
                         </CardContent>
                     </Card>

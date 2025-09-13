@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, ShieldOff } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { AlertTriangle, ShieldOff, LifeBuoy } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { requestUnban } from '@/app/actions';
@@ -62,6 +62,10 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
     window.location.reload();
   }
 
+  const handleCustomerCareClick = () => {
+    window.open('https://uranetworks7-commits.github.io/URA-CH-Help-line/', '_blank');
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-lg border-destructive bg-card/80 backdrop-blur-sm shadow-2xl shadow-destructive/20">
@@ -112,6 +116,12 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
             </div>
           )}
         </CardContent>
+        <CardFooter className="flex-col gap-4 pt-4">
+            <Button variant="link" onClick={handleCustomerCareClick} className="text-blue-400 hover:text-blue-300">
+                <LifeBuoy className="mr-2 h-4 w-4" />
+                Customer Care
+            </Button>
+        </CardFooter>
       </Card>
     </div>
   );

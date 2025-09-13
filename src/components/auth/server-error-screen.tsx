@@ -1,13 +1,17 @@
 'use client';
 
-import { AlertTriangle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { AlertTriangle, LifeBuoy } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 export function ServerErrorScreen() {
   const handleRetry = () => {
     window.location.reload();
   };
+
+  const handleCustomerCareClick = () => {
+    window.open('https://uranetworks7-commits.github.io/URA-CH-Help-line/', '_blank');
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -27,6 +31,12 @@ export function ServerErrorScreen() {
             Try Again
           </Button>
         </CardContent>
+        <CardFooter className="flex-col gap-4 pt-4">
+            <Button variant="link" onClick={handleCustomerCareClick} className="text-blue-400 hover:text-blue-300">
+                <LifeBuoy className="mr-2 h-4 w-4" />
+                Customer Care
+            </Button>
+        </CardFooter>
       </Card>
     </div>
   );
