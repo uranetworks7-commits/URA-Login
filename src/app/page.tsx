@@ -3,7 +3,7 @@
 'use client';
 
 import type { FC } from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { cn } from '@/lib/utils';
 import { type LoginResult, type UserData, type BannedDetails } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import { colorMap } from '@/components/auth/quick-color-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { EmergencyBanner } from '@/components/auth/emergency-banner';
 import { AiLoaderScreen } from '@/components/auth/ai-loader-screen';
+import { UserContext } from '@/components/auth/user-provider';
 
 type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError' | 'crashed';
 type AuthMode = 'login' | 'signup';
@@ -36,9 +37,11 @@ export interface LoginUIState {
 
 const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => {
   const [message, setMessage] = useState('Login successful. Preparing your dashboard...');
+  const { setCurrentUser } = useContext(UserContext);
 
   useEffect(() => {
     if (user) {
+      setCurrentUser(user);
       const websites = [
         'https://urabitcoins.netlify.app',
         'https://openboxpro.netlify.app',
@@ -47,14 +50,12 @@ const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, on
       
       setMessage('Syncing account with other services...');
 
-      // Create hidden iframes to ping the websites
       websites.forEach(baseUrl => {
         const url = `${baseUrl}?username=${encodeURIComponent(user.username)}`;
         const iframe = document.createElement('iframe');
         iframe.style.display = 'none';
         iframe.src = url;
         document.body.appendChild(iframe);
-        // Clean up the iframe after it has loaded
         iframe.onload = () => {
           setTimeout(() => {
             document.body.removeChild(iframe);
@@ -62,13 +63,12 @@ const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, on
         };
       });
 
-      // Redirect after a short delay to allow iframes to load
       setTimeout(() => {
         setMessage('Redirecting...');
         window.location.href = 'file:///android_asset/htmlapp/root/main.html';
-      }, 3000); // 3-second delay
+      }, 3000);
     }
-  }, [user]);
+  }, [user, setCurrentUser]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -106,6 +106,7 @@ export default function Home() {
   const [loadingTitle, setLoadingTitle] = useState('URA Networks 2.0');
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
   const { toast } = useToast();
+  const { setCurrentUser } = useContext(UserContext);
 
 
   const [loginUiState, setLoginUiState] = useState<LoginUIState>(initialLoginUiState);
@@ -180,7 +181,9 @@ export default function Home() {
     const autoOpener = localStorage.getItem('autoOpener') === 'true';
     
     if(rememberMe && savedUsername && savedEmail) {
-        setQuickLoginUser({username: savedUsername, email: savedEmail});
+        const user = {username: savedUsername, email: savedEmail};
+        setQuickLoginUser(user);
+        setCurrentUser(user);
         setAutoOpen(autoOpener);
         setAppState('quickLogin');
     } else {
@@ -197,6 +200,7 @@ export default function Home() {
           api: user.email 
         }, "*");
         setLoggedInUser(user);
+        setCurrentUser(user);
         setAppState('loggedIn');
     } else if (result.status === 'banned' && result.data) {
         localStorage.setItem("failedKey", "true");
@@ -215,10 +219,10 @@ export default function Home() {
   };
   
   const handleLogout = () => {
-    // We keep username and api key for the quick login form, but remove success key.
     localStorage.removeItem('successKey');
     localStorage.removeItem('failedKey');
     setLoggedInUser(null);
+    setCurrentUser(null);
     setBannedDetails(null);
     const rememberMe = localStorage.getItem('rememberMe') === 'true';
     if(rememberMe && quickLoginUser){
@@ -231,10 +235,10 @@ export default function Home() {
   };
   
   const handleExitQuickLogin = () => {
-    // only disable auto login toggles, keep credentials
     localStorage.setItem('rememberMe', 'false');
     localStorage.setItem('autoOpener', 'false');
     setQuickLoginUser(null);
+    setCurrentUser(null);
     setAppState('auth');
   }
 

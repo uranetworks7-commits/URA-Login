@@ -1,7 +1,7 @@
 'use server';
 
 import { initializeApp, getApp, type FirebaseApp } from 'firebase/app';
-import { getDatabase, ref, get, set, update } from 'firebase/database';
+import { getDatabase, ref, get, set, update, push, serverTimestamp, query, orderByChild, equalTo, onValue } from 'firebase/database';
 import { securitySystemCheck, type SecuritySystemInput } from '@/ai/flows/security-system-for-account-bans';
 
 const firebaseConfig = {
@@ -72,9 +72,6 @@ export interface UraSignupData {
 
 export async function createUraAccountRequest(data: UraSignupData): Promise<{ success: boolean; message: string }> {
     console.log("Received URA Account Request:", data);
-    // Here you would typically save this data to a different path in Firebase,
-    // for example, `ura-requests/${data.moderatorId}`.
-    // For now, we'll just simulate a success response.
     try {
         const requestRef = ref(db, `ura_requests/${data.moderatorId}`);
         const snapshot = await get(requestRef);
@@ -118,7 +115,6 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         unbanTimestamp = new Date(userData.bannedAt).getTime() + banDuration;
         if (Date.now() > unbanTimestamp) {
             await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
-            // Refresh user data after unbanning
             const newSnapshot = await get(userRef);
             Object.assign(userData, newSnapshot.val());
         }
@@ -195,4 +191,104 @@ export async function requestUnban(username: string): Promise<{ success: boolean
         console.error('Unban request error:', error);
         return { success: false, message: 'Server error. Could not submit unban request.' };
     }
+}
+
+
+// Mail System Actions
+export interface Message {
+    id: string;
+    sender: string;
+    recipient: string;
+    text: string;
+    timestamp: number;
+    read: boolean;
+}
+
+export async function sendMessage(sender: string, recipient: string, text: string) {
+    if (!sender || !recipient || !text) {
+        return { success: false, message: 'Missing required fields.' };
+    }
+
+    const messagesRef = ref(db, 'help_messages');
+    const newMessageRef = push(messagesRef);
+    
+    try {
+        await set(newMessageRef, {
+            sender,
+            recipient,
+            text,
+            timestamp: serverTimestamp(),
+            read: false,
+        });
+        return { success: true, message: 'Message sent successfully.' };
+    } catch (error) {
+        console.error('Message sending error:', error);
+        return { success: false, message: 'Server error. Could not send message.' };
+    }
+}
+
+export async function getMessagesForUser(username: string): Promise<Message[]> {
+    const messagesRef = ref(db, 'help_messages');
+    const userMessagesQuery = query(messagesRef, orderByChild('recipient'), equalTo(username));
+
+    return new Promise((resolve) => {
+        get(userMessagesQuery).then(snapshot => {
+            const messages: Message[] = [];
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    messages.push({ id: childSnapshot.key!, ...childSnapshot.val() });
+                });
+            }
+            const sentMessagesQuery = query(messagesRef, orderByChild('sender'), equalTo(username));
+            get(sentMessagesQuery).then(sentSnapshot => {
+                 if (sentSnapshot.exists()) {
+                    sentSnapshot.forEach((childSnapshot) => {
+                        // Avoid duplicates
+                        if (!messages.find(m => m.id === childSnapshot.key)) {
+                            messages.push({ id: childSnapshot.key!, ...childSnapshot.val() });
+                        }
+                    });
+                }
+                resolve(messages.sort((a, b) => a.timestamp - b.timestamp));
+            });
+        });
+    });
+}
+
+export async function getAllMessages(): Promise<Record<string, Message[]>> {
+    const messagesRef = ref(db, 'help_messages');
+    const snapshot = await get(query(messagesRef, orderByChild('timestamp')));
+    
+    const conversations: Record<string, Message[]> = {};
+    if (snapshot.exists()) {
+        snapshot.forEach(childSnapshot => {
+            const message: Message = { id: childSnapshot.key!, ...childSnapshot.val() };
+            // Group by the user who is not the admin
+            const conversationKey = message.sender === 'URA-NETWORKS-Team' ? message.recipient : message.sender;
+            if (!conversations[conversationKey]) {
+                conversations[conversationKey] = [];
+            }
+            conversations[conversationKey].push(message);
+        });
+    }
+    return conversations;
+}
+
+export async function markMessagesAsRead(username: string) {
+    const messagesRef = ref(db, 'help_messages');
+    const userMessagesQuery = query(messagesRef, orderByChild('recipient'), equalTo(username));
+
+    const snapshot = await get(userMessagesQuery);
+    if (snapshot.exists()) {
+        const updates: Record<string, any> = {};
+        snapshot.forEach(childSnapshot => {
+            if (!childSnapshot.val().read) {
+                updates[`/${childSnapshot.key}/read`] = true;
+            }
+        });
+        if (Object.keys(updates).length > 0) {
+            await update(ref(db, 'help_messages'), updates);
+        }
+    }
+    return { success: true };
 }

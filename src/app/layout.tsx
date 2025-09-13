@@ -1,6 +1,9 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { UserProvider } from '@/components/auth/user-provider';
+import { HelpProvider } from '@/components/auth/help-provider';
+
 
 export const metadata: Metadata = {
   title: 'Snowflake Login',
@@ -20,7 +23,11 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        {children}
+        <UserProvider>
+          <HelpProvider>
+            {children}
+          </HelpProvider>
+        </UserProvider>
         <Toaster />
       </body>
     </html>
