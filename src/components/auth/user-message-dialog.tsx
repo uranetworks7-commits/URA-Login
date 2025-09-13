@@ -9,8 +9,7 @@ import { sendMessage, type Message } from '@/app/actions';
 import { Loader2, Send } from 'lucide-react';
 import { UserContext } from './user-provider';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface UserMessageDialogProps {
   open: boolean;
@@ -52,14 +51,14 @@ export function UserMessageDialog({ open, onOpenChange, initialMessages, onRefre
     }
   };
 
-  const sentMessages = messages.filter(m => m.sender === currentUser?.username);
-  const receivedMessages = messages.filter(m => m.recipient === currentUser?.username);
+  const sentMessages = messages.filter(m => m.sender === currentUser?.username).sort((a, b) => b.timestamp - a.timestamp);
+  const receivedMessages = messages.filter(m => m.recipient === currentUser?.username).sort((a, b) => b.timestamp - a.timestamp);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-black/80 text-white border-primary/30 backdrop-blur-lg sm:max-w-lg h-[70vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle className="text-primary">Your Conversations</DialogTitle>
+          <DialogTitle className="text-primary">Your Mailbox</DialogTitle>
           <DialogDescription className="text-white/70">
             View messages from and send messages to the URA Support Team.
           </DialogDescription>
@@ -105,7 +104,7 @@ export function UserMessageDialog({ open, onOpenChange, initialMessages, onRefre
         <DialogFooter className="mt-auto pt-4 border-t border-white/20">
             <div className="w-full flex items-start gap-2">
                 <Textarea
-                    placeholder="Type your message here..."
+                    placeholder="Type a new message to the support team..."
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80 flex-1 resize-none"
