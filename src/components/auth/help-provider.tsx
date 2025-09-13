@@ -1,29 +1,38 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Mail } from 'lucide-react';
+import { MessageSquarePlus, Inbox } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getMessagesForUser, markMessagesAsRead, type Message } from '@/app/actions';
 import { UserContext } from './user-provider';
 import { HelpDialog } from './help-dialog';
-import { UserMessageDialog } from './user-message-dialog';
+import { UserInboxDialog } from './user-inbox-dialog'; // New component for received messages
 
 interface HelpContextType {
-  isHelpOpen: boolean;
-  setIsHelpOpen: (open: boolean) => void;
+  isSendOpen: boolean;
+  setIsSendOpen: (open: boolean) => void;
+  isInboxOpen: boolean;
+  setIsInboxOpen: (open: boolean) => void;
   hasUnread: boolean;
+  fetchMessages: () => void;
+  messages: Message[];
 }
 
 const HelpContext = createContext<HelpContextType>({
-  isHelpOpen: false,
-  setIsHelpOpen: () => {},
+  isSendOpen: false,
+  setIsSendOpen: () => {},
+  isInboxOpen: false,
+  setIsInboxOpen: () => {},
   hasUnread: false,
+  fetchMessages: () => {},
+  messages: [],
 });
 
 export const useHelp = () => useContext(HelpContext);
 
 export function HelpProvider({ children }: { children: React.ReactNode }) {
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isSendOpen, setIsSendOpen] = useState(false);
+  const [isInboxOpen, setIsInboxOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const { currentUser } = useContext(UserContext);
   const hasUnread = messages.some(msg => !msg.read && msg.sender === 'URA-NETWORKS-Team');
@@ -43,80 +52,71 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, [fetchMessages]);
 
-  const handleOpen = async () => {
-    setIsHelpOpen(true);
-    if (currentUser && hasUnread) {
+  const handleOpenInbox = async () => {
+    if (!currentUser) {
+        // Guests can't have an inbox. Let them send a message instead.
+        setIsSendOpen(true);
+        return;
+    }
+    setIsInboxOpen(true);
+    if (hasUnread) {
         await markMessagesAsRead(currentUser.username);
         fetchMessages(); // re-fetch to update read status
     }
   };
-
-  const handleClose = () => {
-    setIsHelpOpen(false);
-  }
-
-  const MailButton = () => (
-    <div className="relative">
-      <Button variant="ghost" size="icon" onClick={handleOpen} className="text-white/70 hover:text-white hover:bg-white/10">
-        <Mail className="h-5 w-5" />
-      </Button>
-      {hasUnread && (
-          <span className="absolute top-1 right-1 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-          </span>
-      )}
-    </div>
-  );
+  
+  const receivedMessages = messages.filter(m => m.recipient === currentUser?.username);
 
   return (
-    <HelpContext.Provider value={{ isHelpOpen, setIsHelpOpen, hasUnread }}>
+    <HelpContext.Provider value={{ isSendOpen, setIsSendOpen, isInboxOpen, setIsInboxOpen, hasUnread, fetchMessages, messages }}>
       {children}
-      {/* This renders the button inside the login form */}
-      <div id="mail-icon-portal"></div> 
-      {currentUser ? (
-        <UserMessageDialog open={isHelpOpen} onOpenChange={handleClose} initialMessages={messages} onRefresh={fetchMessages} />
-      ) : (
-        <HelpDialog open={isHelpOpen} onOpenChange={handleClose} />
+      <HelpDialog 
+        open={isSendOpen} 
+        onOpenChange={setIsSendOpen}
+        onMessageSent={fetchMessages}
+      />
+      {currentUser && (
+        <UserInboxDialog
+          open={isInboxOpen}
+          onOpenChange={setIsInboxOpen}
+          messages={receivedMessages}
+        />
       )}
     </HelpContext.Provider>
   );
 }
 
-// A component to render the button via portal
-export const MailButtonPortal = () => {
-    const { hasUnread, setIsHelpOpen } = useHelp();
-    const { currentUser } = useContext(UserContext);
-
-    const handleOpen = async () => {
-        setIsHelpOpen(true);
-        if (currentUser && hasUnread) {
-            await markMessagesAsRead(currentUser.username);
-        }
-    };
+// A component to render the buttons via portal
+export const HelpButtonsPortal = () => {
+    const { hasUnread, setIsSendOpen, setIsInboxOpen } = useHelp();
     
     if (typeof document === 'undefined') {
         return null;
     }
 
-    const portalElement = document.getElementById('mail-icon-portal');
+    const portalElement = document.getElementById('help-buttons-portal');
     if (!portalElement) {
         return null;
     }
     
-    const ButtonComponent = (
-        <div className="relative">
-            <Button type="button" variant="ghost" size="icon" onClick={handleOpen} className="text-white/70 hover:text-white hover:bg-white/10">
-                <Mail className="h-5 w-5" />
+    const Buttons = (
+        <>
+            <Button type="button" variant="ghost" size="icon" onClick={() => setIsSendOpen(true)} className="text-white/70 hover:text-white hover:bg-white/10">
+                <MessageSquarePlus className="h-5 w-5" />
             </Button>
-            {hasUnread && (
-                <span className="absolute top-1 right-1 flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                </span>
-            )}
-        </div>
+            <div className="relative">
+                <Button type="button" variant="ghost" size="icon" onClick={() => setIsInboxOpen(true)} className="text-white/70 hover:text-white hover:bg-white/10">
+                    <Inbox className="h-5 w-5" />
+                </Button>
+                {hasUnread && (
+                    <span className="absolute top-1 right-1 flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                )}
+            </div>
+      </>
     );
     
-    return ButtonComponent;
+    return Buttons;
 };

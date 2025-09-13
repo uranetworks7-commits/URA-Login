@@ -1,20 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { sendMessage } from '@/app/actions';
 import { Loader2 } from 'lucide-react';
+import { UserContext } from './user-provider';
 
 interface HelpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onMessageSent: () => void;
 }
 
-export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
+export function HelpDialog({ open, onOpenChange, onMessageSent }: HelpDialogProps) {
   const { toast } = useToast();
+  const { currentUser } = useContext(UserContext);
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
 
@@ -25,12 +28,12 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
     }
     setIsSending(true);
     try {
-      // For guests, we can use a generic sender ID or ask for an email.
-      // Here, we'll use "Guest" as the sender.
-      const result = await sendMessage('Guest', 'URA-NETWORKS-Team', message);
+      const sender = currentUser?.username || 'Guest';
+      const result = await sendMessage(sender, 'URA-NETWORKS-Team', message);
       if (result.success) {
         toast({ title: 'Message Sent', description: 'The support team will get back to you shortly.' });
         setMessage('');
+        onMessageSent();
         onOpenChange(false);
       } else {
         toast({ variant: 'destructive', title: 'Error', description: result.message });
@@ -48,7 +51,7 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
         <DialogHeader>
           <DialogTitle className="text-primary">Contact Support</DialogTitle>
           <DialogDescription className="text-white/70">
-            Send a message to the Support Team.
+            Send a message to the URA Support Team.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">

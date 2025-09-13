@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, LogIn, Github, MoreVertical, Zap, BatteryCharging, Sparkles, Terminal, Settings, Mail } from 'lucide-react';
+import { Loader2, LogIn, Github, MoreVertical, Zap, BatteryCharging, Sparkles, Terminal, Settings } from 'lucide-react';
 import { loginUser, type LoginResult } from '@/app/actions';
 import type { LoginUIState } from '@/app/page';
 
@@ -24,7 +24,7 @@ import { SettingsPopover } from './settings-popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TermsDialog } from './terms-dialog';
 import { cn } from '@/lib/utils';
-import { MailButtonPortal } from './help-provider';
+import { HelpButtonsPortal } from './help-provider';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -224,7 +224,9 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
             <CardTitle className="text-3xl text-primary font-bold">{uiState.title}</CardTitle>
             <CardDescription className={cn("pt-2", uiState.theme === 'dark' ? "text-white/70" : "text-black/70")}>{uiState.subtitle}</CardDescription>
             <div className="absolute top-4 right-4 flex items-center">
-                {isClient && <MailButtonPortal />}
+                <div id="help-buttons-portal" className="flex items-center">
+                    {isClient && <HelpButtonsPortal />}
+                </div>
                 <SettingsPopover onInternetAccessChange={setIsInternetAllowed} />
             </div>
           </CardHeader>
