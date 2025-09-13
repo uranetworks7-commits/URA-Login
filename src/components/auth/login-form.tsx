@@ -327,11 +327,11 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
             <div className="grid grid-cols-2 gap-4">
               <Button type="button" variant="outline" className={cn("w-full hover:bg-black/30", uiState.theme === 'dark' ? 'bg-black/20 border-white/20 text-white' : 'bg-white/20 border-black/20 text-black')} onClick={() => toast({ title: 'Please Create A GitHub Account' })}>
                 <Github className="mr-2 h-4 w-4" />
-                Sign in with GitHub
+                GitHub
               </Button>
               <Button type="button" variant="outline" className={cn("w-full hover:bg-black/30", uiState.theme === 'dark' ? 'bg-black/20 border-white/20 text-white' : 'bg-white/20 border-black/20 text-black')} onClick={handleGoogleClick}>
                 <GoogleIcon className="mr-2 h-4 w-4" />
-                Sign in with Google
+                Google
               </Button>
             </div>
             
