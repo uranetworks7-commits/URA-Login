@@ -129,6 +129,7 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         case 1:
             return { success: false, message: 'This account is pending for approval.', status: 'pending' };
         case 2:
+            await update(userRef, { lastLoginAt: new Date().toISOString() });
             return { success: true, message: 'Credentials verified.', status: 'approved', data: { username, email } };
         case 3:
             return { success: false, message: 'Your account is permanently banned.', status: 'banned', data: { username, banReason: userData.banReason || 'Violation of terms', banDuration: 'Permanent' } };
