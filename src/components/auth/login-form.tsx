@@ -173,6 +173,21 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
     window.open('https://uranetworks7-commits.github.io/URA-CH-Help-line/', '_blank');
   };
 
+  const handleGoogleClick = () => {
+    const savedEmail = localStorage.getItem('api');
+    if (savedEmail) {
+        toast({
+            title: 'Account Already Chosen',
+            description: `Continuing with ${savedEmail}.`,
+        });
+    } else {
+        toast({
+            title: 'No Account Found',
+            description: 'Please sign in with Google.',
+        });
+    }
+  };
+
   const cardStyle = {
     color: uiState.textColor,
     boxShadow: uiState.glowColor ? `0 0 20px ${uiState.glowColor}`: undefined,
@@ -314,7 +329,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
                 <Github className="mr-2 h-4 w-4" />
                 Sign in with GitHub
               </Button>
-              <Button type="button" variant="outline" className={cn("w-full hover:bg-black/30", uiState.theme === 'dark' ? 'bg-black/20 border-white/20 text-white' : 'bg-white/20 border-black/20 text-black')} onClick={() => toast({ title: 'Sign in with Google is under development.'})}>
+              <Button type="button" variant="outline" className={cn("w-full hover:bg-black/30", uiState.theme === 'dark' ? 'bg-black/20 border-white/20 text-white' : 'bg-white/20 border-black/20 text-black')} onClick={handleGoogleClick}>
                 <GoogleIcon className="mr-2 h-4 w-4" />
                 Sign in with Google
               </Button>
@@ -382,5 +397,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
     </>
   );
 }
+
+    
 
     
