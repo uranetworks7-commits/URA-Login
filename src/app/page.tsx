@@ -1,9 +1,8 @@
-
-
 'use client';
 
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { type LoginResult, type UserData, type BannedDetails } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { EmergencyBanner } from '@/components/auth/emergency-banner';
 import { AiLoaderScreen } from '@/components/auth/ai-loader-screen';
 
-type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError' | 'crashed';
+type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError' | 'crashed' | 'deactivated';
 type AuthMode = 'login' | 'signup';
 
 export interface LoginUIState {
@@ -106,6 +105,7 @@ export default function Home() {
   const [loadingTitle, setLoadingTitle] = useState('URA Networks 2.0');
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
 
   const [loginUiState, setLoginUiState] = useState<LoginUIState>(initialLoginUiState);
@@ -207,6 +207,13 @@ export default function Home() {
         setAppState('serverError');
     } else if (result.status === 'crashed') {
         setAppState('crashed');
+    } else if (result.status === 'deactivated') {
+        toast({
+            variant: 'destructive',
+            title: 'Account Deactivated',
+            description: result.message,
+        });
+        router.push('/reactivate');
     }
     else {
         setShake(true);
@@ -331,5 +338,3 @@ export default function Home() {
     </main>
   );
 }
-
-    

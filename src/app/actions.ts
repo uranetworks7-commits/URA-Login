@@ -37,7 +37,7 @@ export interface BannedDetails {
 export interface LoginResult {
     success: boolean;
     message: string;
-    status?: 'approved' | 'pending' | 'banned' | 'deleted' | 'error' | 'not_found' | 'invalid_credentials' | 'crashed';
+    status?: 'approved' | 'pending' | 'banned' | 'deleted' | 'error' | 'not_found' | 'invalid_credentials' | 'crashed' | 'deactivated';
     data?: UserData | BannedDetails;
 }
 
@@ -93,6 +93,9 @@ export async function createUraAccountRequest(data: UraSignupData): Promise<{ su
     }
 }
 
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+
 
 export async function loginUser(credentials: UserData): Promise<LoginResult> {
     const username = credentials.username.trim();
@@ -118,12 +121,31 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         unbanTimestamp = new Date(userData.bannedAt).getTime() + banDuration;
         if (Date.now() > unbanTimestamp) {
             await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
-            // Refresh user data after unbanning
             const newSnapshot = await get(userRef);
             Object.assign(userData, newSnapshot.val());
         }
     }
+    
+    // Check for reactivation eligibility
+    if (userData.status === 9 && userData.reactivationEligibleAt && Date.now() > userData.reactivationEligibleAt) {
+        await update(userRef, { 
+            status: 2, 
+            reactivationRequest: null,
+            reactivationReason: null,
+            reactivationEligibleAt: null
+        });
+        const newSnapshot = await get(userRef);
+        Object.assign(userData, newSnapshot.val());
+    }
 
+    // Check for inactivity deactivation
+    if (userData.status === 2 && userData.lastLoginAt) {
+        const lastLogin = new Date(userData.lastLoginAt).getTime();
+        if ((Date.now() - lastLogin) > SEVEN_DAYS_MS) {
+            await update(userRef, { status: 9 });
+            userData.status = 9; // update status for current function execution
+        }
+    }
 
     switch (userData.status) {
         case 1:
@@ -150,6 +172,9 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         
         case 8:
             return { success: false, message: 'Your account has encountered a critical issue.', status: 'crashed' };
+        
+        case 9:
+             return { success: false, message: 'Your account has been deactivated due to inactivity.', status: 'deactivated' };
 
         default:
             return { success: false, message: 'Unknown account status. Please contact support.', status: 'error' };
@@ -194,5 +219,47 @@ export async function requestUnban(username: string): Promise<{ success: boolean
     } catch (error) {
         console.error('Unban request error:', error);
         return { success: false, message: 'Server error. Could not submit unban request.' };
+    }
+}
+
+export interface ReactivationData {
+    username: string;
+    email: string;
+    reason: string;
+}
+
+export async function requestReactivation(data: ReactivationData): Promise<{ success: boolean; message: string }> {
+    const { username, email, reason } = data;
+    const userRef = ref(db, `users/${username.toLowerCase().trim()}`);
+    const snapshot = await get(userRef);
+
+    if (!snapshot.exists()) {
+        return { success: false, message: 'User not found.' };
+    }
+
+    const userData = snapshot.val();
+    if (userData.email.toLowerCase() !== email.toLowerCase()) {
+        return { success: false, message: 'Invalid email for this username.' };
+    }
+    
+    if (userData.status !== 9) {
+        return { success: false, message: 'This account is not deactivated.' };
+    }
+    
+    if (userData.reactivationRequest) {
+        return { success: false, message: 'A reactivation request has already been submitted.' };
+    }
+
+    try {
+        await update(userRef, {
+            reactivationRequest: true,
+            reactivationReason: reason,
+            reactivationRequestedAt: new Date().toISOString(),
+            reactivationEligibleAt: Date.now() + TWELVE_HOURS_MS
+        });
+        return { success: true, message: 'Your reactivation request has been submitted. Your account will be eligible for reactivation in 12 hours.' };
+    } catch (error) {
+        console.error("Reactivation request error:", error);
+        return { success: false, message: 'Server error. Could not submit reactivation request.' };
     }
 }
