@@ -2,7 +2,6 @@
 
 import { initializeApp, getApp, type FirebaseApp } from 'firebase/app';
 import { getDatabase, ref, get, set, update } from 'firebase/database';
-import { securitySystemCheck, type SecuritySystemInput } from '@/ai/flows/security-system-for-account-bans';
 
 const firebaseConfig = {
   authDomain: "ura-backup-new1.firebaseapp.com",
