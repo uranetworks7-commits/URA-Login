@@ -16,9 +16,9 @@ import { PermissionNotice } from '@/components/auth/permission-notice';
 import { ServerErrorScreen } from '@/components/auth/server-error-screen';
 import { QuickLoginForm } from '@/components/auth/quick-login-form';
 import { colorMap } from '@/components/auth/quick-color-dialog';
-import { useToast } from '@/hooks/use-toast';
 import { EmergencyBanner } from '@/components/auth/emergency-banner';
 import { AiLoaderScreen } from '@/components/auth/ai-loader-screen';
+import { DeactivatedScreen } from '@/components/auth/deactivated-screen';
 
 type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError' | 'crashed' | 'deactivated';
 type AuthMode = 'login' | 'signup';
@@ -104,7 +104,6 @@ export default function Home() {
   const [isLoginBlocked, setIsLoginBlocked] = useState(false);
   const [loadingTitle, setLoadingTitle] = useState('URA Networks 2.0');
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
-  const { toast } = useToast();
   const router = useRouter();
 
 
@@ -208,12 +207,7 @@ export default function Home() {
     } else if (result.status === 'crashed') {
         setAppState('crashed');
     } else if (result.status === 'deactivated') {
-        toast({
-            variant: 'destructive',
-            title: 'Account Deactivated',
-            description: result.message,
-        });
-        router.push('/reactivate');
+        setAppState('deactivated');
     }
     else {
         setShake(true);
@@ -314,6 +308,8 @@ export default function Home() {
         return <ServerErrorScreen />;
       case 'crashed':
         return <AiLoaderScreen onRestart={() => { setAppState('loading'); }} />;
+      case 'deactivated':
+        return <DeactivatedScreen onReactivate={() => router.push('/reactivate')} onBackToLogin={() => setAppState('auth')} />;
       default:
         // Fallback to loading screen
         return <LoadingScreen onComplete={handleLoadingComplete} title={loadingTitle} isEmergency={isEmergencyMode} />;
