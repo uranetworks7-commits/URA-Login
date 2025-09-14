@@ -1,6 +1,6 @@
 'use client';
 
-import { UserX, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { UserX, ShieldCheck, ArrowLeft, LifeBuoy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -10,6 +10,11 @@ interface DeactivatedScreenProps {
 }
 
 export function DeactivatedScreen({ onReactivate, onBackToLogin }: DeactivatedScreenProps) {
+
+  const handleCustomerCareClick = () => {
+    window.open('https://uranetworks7-commits.github.io/URA-CH-Help-line/', '_blank');
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-lg border-yellow-500/50 bg-card/80 backdrop-blur-sm shadow-2xl shadow-yellow-500/20">
@@ -33,6 +38,10 @@ export function DeactivatedScreen({ onReactivate, onBackToLogin }: DeactivatedSc
             <Button variant="link" onClick={onBackToLogin} className="text-white/80 hover:text-white">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Login
+            </Button>
+             <Button variant="link" onClick={handleCustomerCareClick} className="text-blue-400 hover:text-blue-300">
+                <LifeBuoy className="mr-2 h-4 w-4" />
+                Customer Care
             </Button>
         </CardFooter>
       </Card>
