@@ -24,6 +24,7 @@ const db = getDatabase(app);
 export interface UserData {
     username: string;
     email: string;
+    chatUsername?: string;
 }
 
 export interface BannedDetails {
@@ -41,7 +42,7 @@ export interface LoginResult {
 }
 
 export async function createAccountRequest(data: UserData): Promise<{ success: boolean; message: string }> {
-    const { username, email } = data;
+    const { username, email, chatUsername } = data;
     const userRef = ref(db, `users/${username.toLowerCase().trim()}`);
     const snapshot = await get(userRef);
 
@@ -52,6 +53,7 @@ export async function createAccountRequest(data: UserData): Promise<{ success: b
     try {
         await set(userRef, {
             email: email.trim(),
+            chatUsername: chatUsername,
             status: 1, // Pending Approval
             createdAt: new Date().toISOString(),
         });

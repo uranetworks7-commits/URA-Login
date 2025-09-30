@@ -21,6 +21,7 @@ const signupSchema = z.object({
     .transform(val => val.toLowerCase())
     .refine(val => val.length >= 2, { message: 'Username must be at least 2 characters.'}),
   email: z.string().email('Invalid email address. The @ symbol is mandatory.'),
+  chatUsername: z.string().min(1, 'Chat Username is required'),
   captcha: z.string().min(1, 'Captcha is required'),
   terms: z.boolean().refine(val => val === true, { message: 'You must accept the terms and conditions.' }),
 });
@@ -49,6 +50,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
     defaultValues: {
       username: '',
       email: '',
+      chatUsername: '',
       captcha: '',
       terms: true,
     },
@@ -68,7 +70,7 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
 
     setIsSubmitting(true);
     try {
-      const result = await createAccountRequest({ username: data.username, email: data.email });
+      const result = await createAccountRequest({ username: data.username, email: data.email, chatUsername: data.chatUsername });
       if (result.success) {
         toast({ title: 'Success!', description: result.message });
         localStorage.setItem('lastAccountRequestTime', Date.now().toString());
@@ -104,6 +106,14 @@ export function SignupForm({ onLoginClick }: SignupFormProps) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl><Input type="email" placeholder="m@example.com" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField control={form.control} name="chatUsername" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Chat Username</FormLabel>
+                  <FormControl><Input placeholder="your_chat_name" {...field} className="bg-black/20 border-white/20 focus:bg-black/30 focus:ring-primary/80" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
