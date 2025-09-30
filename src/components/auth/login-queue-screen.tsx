@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import type { UserData } from '@/app/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TradingGraph } from './trading-graph';
+import { Server, Clock } from 'lucide-react';
 
 interface LoginQueueScreenProps {
     user: UserData;
@@ -11,7 +12,7 @@ interface LoginQueueScreenProps {
 }
 
 export function LoginQueueScreen({ user, onComplete }: LoginQueueScreenProps) {
-    const [countdown, setCountdown] = useState(29);
+    const [countdown, setCountdown] = useState(() => Math.floor(Math.random() * 91) + 10); // Random between 10 and 100
 
     useEffect(() => {
         if (countdown > 0) {
@@ -29,6 +30,7 @@ export function LoginQueueScreen({ user, onComplete }: LoginQueueScreenProps) {
         <div className="flex min-h-screen flex-col items-center justify-center p-4">
             <Card className="w-full max-w-lg bg-black/80 text-white border-primary/20 backdrop-blur-lg shadow-2xl shadow-primary/30">
                 <CardHeader className="items-center text-center">
+                    <Server className="h-12 w-12 text-primary mb-4" />
                     <CardTitle className="text-3xl font-bold text-primary">Server Busy</CardTitle>
                     <CardDescription className="text-white/80 pt-2">
                         Your login request is in a queue. Please wait a moment.
@@ -36,7 +38,10 @@ export function LoginQueueScreen({ user, onComplete }: LoginQueueScreenProps) {
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center gap-8 py-8">
                     <div className="text-center">
-                        <p className="font-mono text-lg text-white/70">Time remaining:</p>
+                        <p className="flex items-center font-mono text-lg text-white/70">
+                            <Clock className="mr-2 h-5 w-5" />
+                            Time remaining:
+                        </p>
                         <p className="text-6xl font-bold text-white tracking-tighter">{countdown}s</p>
                     </div>
                     <div className="w-full h-48">
@@ -47,5 +52,3 @@ export function LoginQueueScreen({ user, onComplete }: LoginQueueScreenProps) {
         </div>
     );
 }
-
-    

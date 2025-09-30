@@ -4,16 +4,19 @@ import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const generateDataPoint = (lastValue: number) => {
-    const change = (Math.random() - 0.5) * 10;
-    const newValue = Math.max(10, Math.min(100, lastValue + change));
+    // Increased volatility for a more realistic trading look
+    const changePercent = (Math.random() - 0.48) * 0.15; // More pronounced swings
+    let newValue = lastValue * (1 + changePercent);
+    // Keep values within a reasonable range
+    newValue = Math.max(20, Math.min(200, newValue));
     return { time: new Date().getTime(), value: newValue };
 };
 
 export function TradingGraph() {
     const [data, setData] = useState(() => {
         const initialData = [];
-        let lastValue = 50;
-        for (let i = 0; i < 30; i++) {
+        let lastValue = 100;
+        for (let i = 0; i < 50; i++) { // More data points for a denser graph
             const newDataPoint = generateDataPoint(lastValue);
             initialData.push(newDataPoint);
             lastValue = newDataPoint.value;
@@ -24,12 +27,13 @@ export function TradingGraph() {
     useEffect(() => {
         const interval = setInterval(() => {
             setData(prevData => {
-                const lastValue = prevData.length > 0 ? prevData[prevData.length - 1].value : 50;
+                const lastValue = prevData.length > 0 ? prevData[prevData.length - 1].value : 100;
                 const newDataPoint = generateDataPoint(lastValue);
+                // Keep the array at a fixed size for a scrolling effect
                 const newData = [...prevData.slice(1), newDataPoint];
                 return newData;
             });
-        }, 500); // Update every half a second for smooth animation
+        }, 300); // Faster updates for a more "live" feel
 
         return () => clearInterval(interval);
     }, []);
@@ -38,7 +42,7 @@ export function TradingGraph() {
         <ResponsiveContainer width="100%" height="100%">
             <AreaChart
                 data={data}
-                margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+                margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
             >
                 <defs>
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -47,7 +51,7 @@ export function TradingGraph() {
                     </linearGradient>
                 </defs>
                 <XAxis dataKey="time" hide={true} />
-                <YAxis domain={[0, 110]} hide={true} />
+                <YAxis domain={['dataMin - 20', 'dataMax + 20']} hide={true} />
                 <Tooltip
                     contentStyle={{
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -57,19 +61,18 @@ export function TradingGraph() {
                     }}
                     labelStyle={{ display: 'none' }}
                     itemStyle={{ color: 'hsl(var(--destructive))' }}
+                    formatter={(value: number) => [`$${value.toFixed(2)}`, 'Price']}
                 />
                 <Area
                     type="monotone"
                     dataKey="value"
                     stroke="hsl(var(--destructive))"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#colorValue)"
-                    isAnimationActive={false}
+                    isAnimationActive={false} // Prevents flickering on data update
                 />
             </AreaChart>
         </ResponsiveContainer>
     );
 }
-
-    
