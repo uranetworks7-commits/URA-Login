@@ -4,7 +4,7 @@ import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { type LoginResult, type UserData, type BannedDetails } from '@/app/actions';
+import { type LoginResult, type UserData, type BannedDetails, loginUser } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/auth/loading-screen';
@@ -19,8 +19,9 @@ import { colorMap } from '@/components/auth/quick-color-dialog';
 import { EmergencyBanner } from '@/components/auth/emergency-banner';
 import { AiLoaderScreen } from '@/components/auth/ai-loader-screen';
 import { DeactivatedScreen } from '@/components/auth/deactivated-screen';
+import { LoginQueueScreen } from '@/components/auth/login-queue-screen';
 
-type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError' | 'crashed' | 'deactivated';
+type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError' | 'crashed' | 'deactivated' | 'inQueue';
 type AuthMode = 'login' | 'signup';
 
 export interface LoginUIState {
@@ -96,6 +97,7 @@ export default function Home() {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [loggedInUser, setLoggedInUser] = useState<UserData | null>(null);
   const [bannedDetails, setBannedDetails] = useState<BannedDetails | null>(null);
+  const [queuedUser, setQueuedUser] = useState<UserData | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [quickLoginUser, setQuickLoginUser] = useState<UserData | null>(null);
@@ -202,6 +204,9 @@ export default function Home() {
         window.parent.postMessage({ type: "ban" }, "*");
         setBannedDetails(result.data as BannedDetails);
         setAppState('banned');
+    } else if (result.status === 'in_queue' && result.data) {
+        setQueuedUser(result.data as UserData);
+        setAppState('inQueue');
     } else if (result.status === 'error') {
         setAppState('serverError');
     } else if (result.status === 'crashed') {
@@ -216,11 +221,11 @@ export default function Home() {
   };
   
   const handleLogout = () => {
-    // We keep username and api key for the quick login form, but remove success key.
     localStorage.removeItem('successKey');
     localStorage.removeItem('failedKey');
     setLoggedInUser(null);
     setBannedDetails(null);
+    setQueuedUser(null);
     const rememberMe = localStorage.getItem('rememberMe') === 'true';
     if(rememberMe && quickLoginUser){
         setAppState('quickLogin');
@@ -232,7 +237,6 @@ export default function Home() {
   };
   
   const handleExitQuickLogin = () => {
-    // only disable auto login toggles, keep credentials
     localStorage.setItem('rememberMe', 'false');
     localStorage.setItem('autoOpener', 'false');
     setQuickLoginUser(null);
@@ -245,6 +249,12 @@ export default function Home() {
       setAuthMode(prev => prev === 'login' ? 'signup' : 'login');
     }, 250);
   }
+
+  const handleFinalLogin = async (user: UserData) => {
+    const result = await loginUser(user);
+    handleLoginResult(result);
+  };
+
   
   const CurrentScreen = () => {
     if (!isClient) {
@@ -296,6 +306,8 @@ export default function Home() {
             </div>
           </div>
         );
+      case 'inQueue':
+        return queuedUser && <LoginQueueScreen user={queuedUser} onComplete={handleFinalLogin} />;
       case 'loggedIn':
         return (
              <div className="flex min-h-screen items-center justify-center p-4">
@@ -311,7 +323,6 @@ export default function Home() {
       case 'deactivated':
         return <DeactivatedScreen onReactivate={() => router.push('/reactivate')} onBackToLogin={() => setAppState('auth')} />;
       default:
-        // Fallback to loading screen
         return <LoadingScreen onComplete={handleLoadingComplete} title={loadingTitle} isEmergency={isEmergencyMode} />;
     }
   };
@@ -334,3 +345,5 @@ export default function Home() {
     </main>
   );
 }
+
+    

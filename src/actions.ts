@@ -38,7 +38,7 @@ export interface BannedDetails {
 export interface LoginResult {
     success: boolean;
     message: string;
-    status?: 'approved' | 'pending' | 'banned' | 'deleted' | 'error' | 'not_found' | 'invalid_credentials';
+    status?: 'approved' | 'pending' | 'banned' | 'deleted' | 'error' | 'not_found' | 'invalid_credentials' | 'in_queue';
     data?: UserData | BannedDetails;
 }
 
@@ -175,6 +175,9 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         case 7:
             return { success: false, message: 'A server error occurred with your account. Please contact support.', status: 'error' };
         
+        case 10:
+             return { success: false, message: 'Login in queue.', status: 'in_queue', data: { username, email } };
+
         default:
             return { success: false, message: 'Unknown account status. Please contact support.', status: 'error' };
     }
@@ -220,3 +223,5 @@ export async function requestUnban(username: string): Promise<{ success: boolean
         return { success: false, message: 'Server error. Could not submit unban request.' };
     }
 }
+
+    

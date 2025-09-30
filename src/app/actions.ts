@@ -37,7 +37,7 @@ export interface BannedDetails {
 export interface LoginResult {
     success: boolean;
     message: string;
-    status?: 'approved' | 'pending' | 'banned' | 'deleted' | 'error' | 'not_found' | 'invalid_credentials' | 'crashed' | 'deactivated';
+    status?: 'approved' | 'pending' | 'banned' | 'deleted' | 'error' | 'not_found' | 'invalid_credentials' | 'crashed' | 'deactivated' | 'in_queue';
     data?: UserData | BannedDetails;
 }
 
@@ -73,9 +73,6 @@ export interface UraSignupData {
 
 export async function createUraAccountRequest(data: UraSignupData): Promise<{ success: boolean; message: string }> {
     console.log("Received URA Account Request:", data);
-    // Here you would typically save this data to a different path in Firebase,
-    // for example, `ura-requests/${data.moderatorId}`.
-    // For now, we'll just simulate a success response.
     try {
         const requestRef = ref(db, `ura_requests/${data.moderatorId}`);
         const snapshot = await get(requestRef);
@@ -116,7 +113,6 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
     
     let unbanTimestamp;
 
-    // Check for expired temporary bans first
     if ((userData.status === 4 || userData.status === 5) && userData.bannedAt) {
         const banDuration = userData.status === 4 ? (24 * 60 * 60 * 1000) : (7 * 24 * 60 * 60 * 1000);
         unbanTimestamp = new Date(userData.bannedAt).getTime() + banDuration;
@@ -127,7 +123,6 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         }
     }
     
-    // Check for reactivation eligibility
     if (userData.status === 9 && userData.reactivationEligibleAt && Date.now() > userData.reactivationEligibleAt) {
         await update(userRef, { 
             status: 2, 
@@ -139,12 +134,11 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         Object.assign(userData, newSnapshot.val());
     }
 
-    // Check for inactivity deactivation
     if (userData.status === 2 && userData.lastLoginAt) {
         const lastLogin = new Date(userData.lastLoginAt).getTime();
         if ((Date.now() - lastLogin) > SEVEN_DAYS_MS) {
             await update(userRef, { status: 9 });
-            userData.status = 9; // update status for current function execution
+            userData.status = 9; 
         }
     }
 
@@ -157,11 +151,11 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         case 3:
             return { success: false, message: 'Your account is permanently banned.', status: 'banned', data: { username, banReason: userData.banReason || 'Violation of terms', banDuration: 'Permanent' } };
         
-        case 4: // 24-hour ban
+        case 4: 
             unbanTimestamp = new Date(userData.bannedAt).getTime() + (24 * 60 * 60 * 1000);
             return { success: false, message: 'Your account is banned for 24 hours.', status: 'banned', data: { username, banReason: userData.banReason || 'Temporary suspension', banDuration: '24 Hours', unbanAt: unbanTimestamp } };
 
-        case 5: // 7-day ban
+        case 5: 
             unbanTimestamp = new Date(userData.bannedAt).getTime() + (7 * 24 * 60 * 60 * 1000);
             return { success: false, message: 'Your account is banned for 7 days.', status: 'banned', data: { username, banReason: userData.banReason || 'Extended suspension', banDuration: '7 Days', unbanAt: unbanTimestamp } };
         
@@ -176,6 +170,9 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         
         case 9:
              return { success: false, message: 'Your account has been deactivated due to inactivity.', status: 'deactivated' };
+
+        case 10:
+             return { success: false, message: 'Login in queue.', status: 'in_queue', data: { username, email } };
 
         default:
             return { success: false, message: 'Unknown account status. Please contact support.', status: 'error' };
@@ -264,3 +261,16 @@ export async function requestReactivation(data: ReactivationData): Promise<{ suc
         return { success: false, message: 'Server error. Could not submit reactivation request.' };
     }
 }
+
+
+export async function finalizeQueuedLogin(user: UserData): Promise<LoginResult> {
+    const userRef = ref(db, `users/${user.username.toLowerCase()}`);
+    try {
+        await update(userRef, { lastLoginAt: new Date().toISOString() });
+        return { success: true, message: 'Credentials verified.', status: 'approved', data: user };
+    } catch (error) {
+        return { success: false, message: 'Failed to finalize login.', status: 'error' };
+    }
+}
+
+    
