@@ -11,12 +11,7 @@ interface LoginQueueScreenProps {
 }
 
 export function LoginQueueScreen({ user, onComplete }: LoginQueueScreenProps) {
-    const [countdown, setCountdown] = useState(0);
-
-    useEffect(() => {
-        const randomDuration = Math.floor(Math.random() * (100 - 10 + 1)) + 10;
-        setCountdown(randomDuration);
-    }, []);
+    const [countdown, setCountdown] = useState(29);
 
     useEffect(() => {
         if (countdown > 0) {
