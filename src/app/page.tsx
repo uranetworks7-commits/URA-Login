@@ -4,7 +4,7 @@ import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { type LoginResult, type UserData, type BannedDetails, loginUser } from '@/app/actions';
+import { type LoginResult, type UserData, type BannedDetails, loginUser, finalizeQueuedLogin } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/auth/loading-screen';
@@ -251,7 +251,7 @@ export default function Home() {
   }
 
   const handleFinalLogin = async (user: UserData) => {
-    const result = await loginUser(user);
+    const result = await finalizeQueuedLogin(user);
     handleLoginResult(result);
   };
 

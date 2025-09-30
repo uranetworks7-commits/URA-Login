@@ -224,4 +224,14 @@ export async function requestUnban(username: string): Promise<{ success: boolean
     }
 }
 
+export async function finalizeQueuedLogin(user: UserData): Promise<LoginResult> {
+    const userRef = ref(db, `users/${user.username.toLowerCase()}`);
+    try {
+        await update(userRef, { lastLoginAt: new Date().toISOString() });
+        return { success: true, message: 'Credentials verified.', status: 'approved', data: user };
+    } catch (error) {
+        return { success: false, message: 'Failed to finalize login.', status: 'error' };
+    }
+}
+
     
