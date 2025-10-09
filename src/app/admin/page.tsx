@@ -8,6 +8,7 @@ import { getAllUsers, updateUserStatus, applyCustomBan } from './actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -67,9 +68,11 @@ export default function AdminPage() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [isCustomBanModalOpen, setIsCustomBanModalOpen] = useState(false);
     const [isChangeStatusModalOpen, setIsChangeStatusModalOpen] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [confirmAction, setConfirmAction] = useState<{ action: () => void; title: string; description: string } | null>(null);
     const [customBanHours, setCustomBanHours] = useState(1);
     const [customBanReason, setCustomBanReason] = useState('');
-    const [newStatus, setNewStatus] = useState<number>(0);
+    const [newStatus, setNewStatus] = useState(0);
 
     useEffect(() => {
         fetchUsers();
@@ -96,6 +99,15 @@ export default function AdminPage() {
             toast({ variant: 'destructive', title: 'Error', description: result.message });
         }
     };
+    
+    const openConfirmation = (user: User, status: number, title: string, description: string) => {
+        setConfirmAction({
+            action: () => handleUpdateStatus(user.username, status),
+            title,
+            description,
+        });
+        setIsConfirmOpen(true);
+    }
     
     const handleCustomBan = async () => {
         if(!selectedUser) return;
@@ -186,10 +198,10 @@ export default function AdminPage() {
                                                         ) : (user.status === 3 ? 'Permanent' : 'N/A')}
                                                     </TableCell>
                                                     <TableCell className="text-right space-x-1">
-                                                        <Button variant="ghost" size="icon" onClick={() => handleUpdateStatus(user.username, 3)} title="Permanent Ban"><Shield className="text-red-500"/></Button>
-                                                        <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(user); setIsCustomBanModalOpen(true); }} title="Custom Ban"><ShieldOff className="text-yellow-500"/></Button>
-                                                        <Button variant="ghost" size="icon" onClick={() => handleUpdateStatus(user.username, 9)} title="Deactivate"><UserX className="text-orange-500"/></Button>
-                                                        <Button variant="ghost" size="icon" onClick={() => handleUpdateStatus(user.username, 2)} title="Activate/Unban"><UserCheck className="text-green-500"/></Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => openConfirmation(user, 3, 'Permanent Ban', `Are you sure you want to permanently ban ${user.username}?`)} title="Permanent Ban"><Shield className="text-red-500"/></Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(user); setCustomBanHours(1); setCustomBanReason(''); setIsCustomBanModalOpen(true); }} title="Custom Ban"><ShieldOff className="text-yellow-500"/></Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => openConfirmation(user, 9, 'Deactivate User', `Are you sure you want to deactivate ${user.username}? This is for inactivity.`)} title="Deactivate"><UserX className="text-orange-500"/></Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => openConfirmation(user, 2, 'Activate/Unban User', `Are you sure you want to activate or unban ${user.username}?`)} title="Activate/Unban"><UserCheck className="text-green-500"/></Button>
                                                         <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(user); setNewStatus(user.status); setIsChangeStatusModalOpen(true); }} title="Edit Status"><Edit className="text-blue-400"/></Button>
                                                     </TableCell>
                                                 </TableRow>
@@ -206,6 +218,25 @@ export default function AdminPage() {
                 </Button>
             </div>
         </main>
+        
+        {/* Confirmation Dialog */}
+        <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+            <AlertDialogContent className="bg-black/80 text-white border-primary/30">
+                <AlertDialogHeader>
+                    <AlertDialogTitle>{confirmAction?.title}</AlertDialogTitle>
+                    <AlertDialogDescription className="text-white/80">
+                        {confirmAction?.description}
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setIsConfirmOpen(false)}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => {
+                        confirmAction?.action();
+                        setIsConfirmOpen(false);
+                    }}>Confirm</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
 
         {/* Custom Ban Modal */}
         <Dialog open={isCustomBanModalOpen} onOpenChange={setIsCustomBanModalOpen}>
@@ -254,4 +285,3 @@ export default function AdminPage() {
     );
 }
 
-    
