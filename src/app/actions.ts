@@ -91,7 +91,7 @@ export async function createUraAccountRequest(data: UraSignupData): Promise<{ su
     }
 }
 
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+const TEN_DAYS_MS = 10 * 24 * 60 * 60 * 1000;
 const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
 
 
@@ -146,7 +146,7 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
 
     if (userData.status === 2 && userData.lastLoginAt) {
         const lastLogin = new Date(userData.lastLoginAt).getTime();
-        if ((Date.now() - lastLogin) > SEVEN_DAYS_MS) {
+        if ((Date.now() - lastLogin) > TEN_DAYS_MS) {
             await update(userRef, { status: 9 });
             userData.status = 9; 
         }

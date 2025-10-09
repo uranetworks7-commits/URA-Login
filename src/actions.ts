@@ -38,7 +38,7 @@ export interface BannedDetails {
 export interface LoginResult {
     success: boolean;
     message: string;
-    status?: 'approved' | 'pending' | 'banned' | 'deleted' | 'error' | 'not_found' | 'invalid_credentials' | 'in_queue';
+    status?: 'approved' | 'pending' | 'banned' | 'deleted' | 'error' | 'not_found' | 'invalid_credentials' | 'in_queue' | 'deactivated';
     data?: UserData | BannedDetails;
 }
 
@@ -95,6 +95,8 @@ export async function createUraAccountRequest(data: UraSignupData): Promise<{ su
     }
 }
 
+const TEN_DAYS_MS = 10 * 24 * 60 * 60 * 1000;
+const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
 
 export async function loginUser(credentials: UserData): Promise<LoginResult> {
     const username = credentials.username.trim();
@@ -119,7 +121,7 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         let banDuration;
         if(userData.status === 4){ // 24hr
             banDuration = 24 * 60 * 60 * 1000;
-        } else if (userData.status === 5) { // 7day
+        } else if (userData.status === 5 && !userData.unbanAt) { // 7day
              banDuration = 7 * 24 * 60 * 60 * 1000;
         } else if (userData.unbanAt) { // Custom ban
              banDuration = new Date(userData.unbanAt).getTime() - new Date(userData.bannedAt).getTime();
@@ -133,6 +135,25 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
                 const newSnapshot = await get(userRef);
                 Object.assign(userData, newSnapshot.val());
             }
+        }
+    }
+    
+    if (userData.status === 9 && userData.reactivationEligibleAt && Date.now() > userData.reactivationEligibleAt) {
+        await update(userRef, { 
+            status: 2, 
+            reactivationRequest: null,
+            reactivationReason: null,
+            reactivationEligibleAt: null
+        });
+        const newSnapshot = await get(userRef);
+        Object.assign(userData, newSnapshot.val());
+    }
+
+    if (userData.status === 2 && userData.lastLoginAt) {
+        const lastLogin = new Date(userData.lastLoginAt).getTime();
+        if ((Date.now() - lastLogin) > TEN_DAYS_MS) {
+            await update(userRef, { status: 9 });
+            userData.status = 9; 
         }
     }
 
@@ -185,6 +206,9 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         case 7:
             return { success: false, message: 'A server error occurred with your account. Please contact support.', status: 'error' };
         
+        case 9:
+             return { success: false, message: 'Your account has been deactivated due to inactivity.', status: 'deactivated' };
+        
         case 10:
              return { success: false, message: 'Login in queue.', status: 'in_queue', data: { username, email } };
 
@@ -211,7 +235,7 @@ export async function requestUnban(username: string): Promise<{ success: boolean
         let banDuration;
         if(userData.status === 4){ // 24hr
             banDuration = 24 * 60 * 60 * 1000;
-        } else if (userData.status === 5) { // 7day
+        } else if (userData.status === 5 && !userData.unbanAt) { // 7day
              banDuration = 7 * 24 * 60 * 60 * 1000;
         } else if (userData.unbanAt) { // Custom ban
              banDuration = new Date(userData.unbanAt).getTime() - new Date(userData.bannedAt).getTime();
@@ -242,6 +266,49 @@ export async function requestUnban(username: string): Promise<{ success: boolean
         return { success: false, message: 'Server error. Could not submit unban request.' };
     }
 }
+
+export interface ReactivationData {
+    username: string;
+    email: string;
+    reason: string;
+}
+
+export async function requestReactivation(data: ReactivationData): Promise<{ success: boolean; message: string }> {
+    const { username, email, reason } = data;
+    const userRef = ref(db, `users/${username.toLowerCase().trim()}`);
+    const snapshot = await get(userRef);
+
+    if (!snapshot.exists()) {
+        return { success: false, message: 'User not found.' };
+    }
+
+    const userData = snapshot.val();
+    if (userData.email.toLowerCase() !== email.toLowerCase()) {
+        return { success: false, message: 'Invalid email for this username.' };
+    }
+    
+    if (userData.status !== 9) {
+        return { success: false, message: 'This account is not deactivated.' };
+    }
+    
+    if (userData.reactivationRequest) {
+        return { success: false, message: 'A reactivation request has already been submitted.' };
+    }
+
+    try {
+        await update(userRef, {
+            reactivationRequest: true,
+            reactivationReason: reason,
+            reactivationRequestedAt: new Date().toISOString(),
+            reactivationEligibleAt: Date.now() + TWELVE_HOURS_MS
+        });
+        return { success: true, message: 'Your reactivation request has been submitted. Your account will be eligible for reactivation in 12 hours.' };
+    } catch (error) {
+        console.error("Reactivation request error:", error);
+        return { success: false, message: 'Server error. Could not submit reactivation request.' };
+    }
+}
+
 
 export async function finalizeQueuedLogin(user: UserData): Promise<LoginResult> {
     const userRef = ref(db, `users/${user.username.toLowerCase()}`);
