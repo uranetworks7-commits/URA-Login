@@ -116,13 +116,23 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
 
     // Check for expired temporary bans first
     if ((userData.status === 4 || userData.status === 5) && userData.bannedAt) {
-        const banDuration = userData.status === 4 ? (24 * 60 * 60 * 1000) : (7 * 24 * 60 * 60 * 1000);
-        unbanTimestamp = new Date(userData.bannedAt).getTime() + banDuration;
-        if (Date.now() > unbanTimestamp) {
-            await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
-            // Refresh user data after unbanning
-            const newSnapshot = await get(userRef);
-            Object.assign(userData, newSnapshot.val());
+        let banDuration;
+        if(userData.status === 4){ // 24hr
+            banDuration = 24 * 60 * 60 * 1000;
+        } else if (userData.status === 5) { // 7day
+             banDuration = 7 * 24 * 60 * 60 * 1000;
+        } else if (userData.unbanAt) { // Custom ban
+             banDuration = new Date(userData.unbanAt).getTime() - new Date(userData.bannedAt).getTime();
+        }
+
+        if(banDuration){
+            unbanTimestamp = new Date(userData.bannedAt).getTime() + banDuration;
+            if (Date.now() > unbanTimestamp) {
+                await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanAt: null });
+                // Refresh user data after unbanning
+                const newSnapshot = await get(userRef);
+                Object.assign(userData, newSnapshot.val());
+            }
         }
     }
 
@@ -165,10 +175,10 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
             unbanTimestamp = new Date(userData.bannedAt).getTime() + (24 * 60 * 60 * 1000);
             return { success: false, message: 'Your account is banned for 24 hours.', status: 'banned', data: { username, banReason: userData.banReason || 'Temporary suspension', banDuration: '24 Hours', unbanAt: unbanTimestamp } };
 
-        case 5: // 7-day ban
-            unbanTimestamp = new Date(userData.bannedAt).getTime() + (7 * 24 * 60 * 60 * 1000);
-            return { success: false, message: 'Your account is banned for 7 days.', status: 'banned', data: { username, banReason: userData.banReason || 'Extended suspension', banDuration: '7 Days', unbanAt: unbanTimestamp } };
-        
+        case 5: // 7-day ban or custom
+            unbanTimestamp = userData.unbanAt || (new Date(userData.bannedAt).getTime() + (7 * 24 * 60 * 60 * 1000));
+            return { success: false, message: `Your account is temporarily banned.`, status: 'banned', data: { username, banReason: userData.banReason || 'Suspension', banDuration: userData.banDuration || 'Temporary', unbanAt: unbanTimestamp } };
+
         case 6:
             return { success: false, message: 'This account has been deleted.', status: 'deleted' };
         
@@ -198,16 +208,25 @@ export async function requestUnban(username: string): Promise<{ success: boolean
     const isTempBanned = (userData.status === 4 || userData.status === 5) && userData.bannedAt;
     
     if (isTempBanned) {
-        const banDuration = userData.status === 4 ? (24 * 60 * 60 * 1000) : (7 * 24 * 60 * 60 * 1000);
-        const unbanTimestamp = new Date(userData.bannedAt).getTime() + banDuration;
+        let banDuration;
+        if(userData.status === 4){ // 24hr
+            banDuration = 24 * 60 * 60 * 1000;
+        } else if (userData.status === 5) { // 7day
+             banDuration = 7 * 24 * 60 * 60 * 1000;
+        } else if (userData.unbanAt) { // Custom ban
+             banDuration = new Date(userData.unbanAt).getTime() - new Date(userData.bannedAt).getTime();
+        }
 
-        if (Date.now() > unbanTimestamp) {
-            try {
-                await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanRequest: null, unbanRequestAt: null });
-                return { success: true, message: 'Your account has been automatically unbanned. You can now log in.', autoUnbanned: true };
-            } catch (error) {
-                console.error('Auto unban error:', error);
-                return { success: false, message: 'Server error. Could not automatically unban your account.' };
+        if(banDuration){
+            const unbanTimestamp = new Date(userData.bannedAt).getTime() + banDuration;
+            if (Date.now() > unbanTimestamp) {
+                try {
+                    await update(userRef, { status: 2, banReason: null, banDuration: null, bannedAt: null, unbanRequest: null, unbanRequestAt: null });
+                    return { success: true, message: 'Your account has been automatically unbanned. You can now log in.', autoUnbanned: true };
+                } catch (error) {
+                    console.error('Auto unban error:', error);
+                    return { success: false, message: 'Server error. Could not automatically unban your account.' };
+                }
             }
         }
     }

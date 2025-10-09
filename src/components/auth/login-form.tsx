@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, LogIn, Github, MoreVertical, Zap, BatteryCharging, Sparkles, Terminal, Settings, Mail, LifeBuoy } from 'lucide-react';
+import { Loader2, LogIn, Github, MoreVertical, Zap, BatteryCharging, Sparkles, Terminal, Settings, Mail, LifeBuoy, Shield } from 'lucide-react';
 import { loginUser, type LoginResult } from '@/app/actions';
 import type { LoginUIState } from '@/app/page';
 
@@ -172,6 +172,16 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
   const handleCustomerCareClick = () => {
     window.open('https://uranetworks7-commits.github.io/URA-CH-Help-line/', '_blank');
   };
+  
+  const handleControlPanelClick = () => {
+    const key = prompt("Enter Admin Key:");
+    if (key === 'Utkarsh225') {
+        router.push('/admin');
+    } else {
+        toast({ variant: 'destructive', title: 'Access Denied' });
+    }
+  };
+
 
   const handleGoogleClick = () => {
     const savedEmail = localStorage.getItem('api');
@@ -219,10 +229,17 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto bg-black/70 text-white border-white/20 backdrop-blur-lg p-0">
-                       <Button variant="link" onClick={handleCustomerCareClick} className="text-white hover:text-primary p-4">
-                            <LifeBuoy className="mr-2 h-4 w-4" />
-                            Customer Care
-                        </Button>
+                       <div className="flex flex-col">
+                           <Button variant="link" onClick={handleCustomerCareClick} className="text-white hover:text-primary p-4 justify-start">
+                                <LifeBuoy className="mr-2 h-4 w-4" />
+                                Customer Care
+                            </Button>
+                            <Separator className="bg-white/20" />
+                             <Button variant="link" onClick={handleControlPanelClick} className="text-white hover:text-primary p-4 justify-start">
+                                <Shield className="mr-2 h-4 w-4" />
+                                Control Panel
+                            </Button>
+                       </div>
                     </PopoverContent>
                 </Popover>
                 <SettingsPopover onInternetAccessChange={setIsInternetAllowed} />
@@ -401,3 +418,4 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
     
 
     
+
