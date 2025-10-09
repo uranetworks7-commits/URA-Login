@@ -86,6 +86,7 @@ const keyframes = `
 
 
 export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked, setLoadingTitle: handleSetName, initialLoginUiState, isEmergencyMode, setIsEmergencyMode }: LoginFormProps) {
+  const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCmdOpen, setIsCmdOpen] = useState(false);
