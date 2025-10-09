@@ -136,8 +136,10 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
     if (userData.status === 9 && userData.reactivationEligibleAt && Date.now() > userData.reactivationEligibleAt) {
         await update(userRef, { 
             status: 2, 
+            lastLoginAt: new Date().toISOString(),
             reactivationRequest: null,
             reactivationReason: null,
+            reactivationRequestedAt: null,
             reactivationEligibleAt: null
         });
         const newSnapshot = await get(userRef);

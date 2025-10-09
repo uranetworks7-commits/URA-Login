@@ -138,17 +138,21 @@ export async function loginUser(credentials: UserData): Promise<LoginResult> {
         }
     }
     
+    // Check for reactivation eligibility after 12 hours
     if (userData.status === 9 && userData.reactivationEligibleAt && Date.now() > userData.reactivationEligibleAt) {
         await update(userRef, { 
             status: 2, 
+            lastLoginAt: new Date().toISOString(),
             reactivationRequest: null,
             reactivationReason: null,
+            reactivationRequestedAt: null,
             reactivationEligibleAt: null
         });
         const newSnapshot = await get(userRef);
         Object.assign(userData, newSnapshot.val());
     }
 
+    // Check for inactivity deactivation
     if (userData.status === 2 && userData.lastLoginAt) {
         const lastLogin = new Date(userData.lastLoginAt).getTime();
         if ((Date.now() - lastLogin) > TEN_DAYS_MS) {
