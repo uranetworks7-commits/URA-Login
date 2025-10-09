@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -119,6 +120,8 @@ export default function AdminPage() {
         setSelectedUser(null);
         setNewStatus(0);
     }
+    
+    const isValidDate = (date: any) => date && !isNaN(new Date(date).getTime());
 
     return (
         <>
@@ -161,7 +164,7 @@ export default function AdminPage() {
                                                         {statusMap[user.status]?.text || `Unknown (${user.status})`}
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell>{user.lastLoginAt ? formatDistanceToNow(new Date(user.lastLoginAt), { addSuffix: true }) : 'Never'}</TableCell>
+                                                <TableCell>{isValidDate(user.lastLoginAt) ? formatDistanceToNow(new Date(user.lastLoginAt!), { addSuffix: true }) : 'Never'}</TableCell>
                                                 <TableCell>
                                                     {user.unbanAt ? (
                                                         <div className="text-xs">
@@ -237,5 +240,6 @@ export default function AdminPage() {
         </>
     );
 }
+
 
     
