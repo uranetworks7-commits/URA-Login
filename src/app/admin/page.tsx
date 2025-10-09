@@ -71,14 +71,9 @@ export default function AdminPage() {
     const [newStatus, setNewStatus] = useState(0);
 
     useEffect(() => {
-        const key = prompt("Enter Admin Key:");
-        if (key !== 'Utkarsh225') {
-            toast({ variant: 'destructive', title: 'Access Denied', description: 'Invalid admin key.' });
-            router.push('/');
-        } else {
-            fetchUsers();
-        }
-    }, [router, toast]);
+        // The check is now handled before navigating to this page.
+        fetchUsers();
+    }, []);
 
     const fetchUsers = async () => {
         setIsLoading(true);
@@ -242,3 +237,5 @@ export default function AdminPage() {
         </>
     );
 }
+
+    
