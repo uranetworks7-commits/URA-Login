@@ -69,10 +69,9 @@ export default function AdminPage() {
     const [isChangeStatusModalOpen, setIsChangeStatusModalOpen] = useState(false);
     const [customBanHours, setCustomBanHours] = useState(1);
     const [customBanReason, setCustomBanReason] = useState('');
-    const [newStatus, setNewStatus] = useState(0);
+    const [newStatus, setNewStatus] = useState<number>(0);
 
     useEffect(() => {
-        // The check is now handled before navigating to this page.
         fetchUsers();
     }, []);
 
@@ -204,7 +203,7 @@ export default function AdminPage() {
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="duration" className="text-right">Duration (Hours)</Label>
-                        <Input id="duration" type="number" value={customBanHours} onChange={(e) => setCustomBanHours(parseInt(e.target.value))} className="col-span-3 bg-black/30 border-white/20"/>
+                        <Input id="duration" type="number" value={customBanHours} onChange={(e) => setCustomBanHours(parseInt(e.target.value) || 0)} className="col-span-3 bg-black/30 border-white/20"/>
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="reason" className="text-right">Reason</Label>
@@ -228,7 +227,7 @@ export default function AdminPage() {
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="status" className="text-right">New Status</Label>
-                        <Input id="status" type="number" value={newStatus} onChange={(e) => setNewStatus(parseInt(e.target.value))} className="col-span-3 bg-black/30 border-white/20"/>
+                        <Input id="status" type="number" value={newStatus} onChange={(e) => setNewStatus(parseInt(e.target.value) || 0)} className="col-span-3 bg-black/30 border-white/20"/>
                     </div>
                 </div>
                  <DialogFooter>
@@ -240,6 +239,3 @@ export default function AdminPage() {
         </>
     );
 }
-
-
-    
