@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { AlertTriangle, ShieldOff, LifeBuoy } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { AlertTriangle, ShieldOff, LifeBuoy, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { requestUnban } from '@/app/actions';
+import { format } from 'date-fns';
 
 export interface BannedDetails {
   username?: string;
@@ -14,13 +15,45 @@ export interface BannedDetails {
   unbanAt?: number;
 }
 
+const CountdownTimer = ({ unbanAt }: { unbanAt: number }) => {
+    const [timeLeft, setTimeLeft] = useState(unbanAt - Date.now());
+
+    useEffect(() => {
+        if (timeLeft <= 0) return;
+        const interval = setInterval(() => {
+            setTimeLeft(prev => prev - 1000);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [timeLeft]);
+
+    if (timeLeft <= 0) {
+        return <span className="text-green-400 font-bold">Ban Expired</span>;
+    }
+
+    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+    return (
+        <div className="font-mono text-xl sm:text-2xl text-white">
+            {days > 0 && <span>{days}d </span>}
+            <span>{String(hours).padStart(2, '0')}h </span>
+            <span>{String(minutes).padStart(2, '0')}m </span>
+            <span>{String(seconds).padStart(2, '0')}s</span>
+        </div>
+    );
+};
+
+
 export function BannedScreen({ details }: { details: BannedDetails }) {
-  const { username, banReason, banDuration } = details;
+  const { username, banReason, banDuration, unbanAt } = details;
   const { toast } = useToast();
   const [isRequesting, setIsRequesting] = useState(false);
   const [requestStatus, setRequestStatus] = useState<{success: boolean; message: string; autoUnbanned?: boolean} | null>(null);
 
   const isPermanent = banDuration === 'Permanent';
+  const isTempBan = !isPermanent && unbanAt;
 
   const handleUnbanRequest = async () => {
     if (!username) {
@@ -86,6 +119,19 @@ export function BannedScreen({ details }: { details: BannedDetails }) {
               <span className="font-medium">Duration:</span> {banDuration || 'Not specified'}
             </p>
           </div>
+          
+          {isTempBan && (
+            <div className="space-y-4 rounded-lg border border-white/20 bg-black/20 p-4">
+                <div className="flex items-center justify-center gap-2 text-white/80">
+                    <Clock className="h-5 w-5"/>
+                    <h4 className="font-semibold text-lg">Time Left to Unban</h4>
+                </div>
+                <CountdownTimer unbanAt={unbanAt} />
+                 <p className="text-xs text-white/60">
+                    Unban on: {format(new Date(unbanAt), "MMM d, yyyy 'at' h:mm a")}
+                </p>
+            </div>
+          )}
 
           {!isPermanent && !requestStatus?.autoUnbanned && (
             <div className="space-y-4 pt-2">
