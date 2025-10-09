@@ -121,6 +121,17 @@ export default function AdminPage() {
     }
     
     const isValidDate = (date: any) => date && !isNaN(new Date(date).getTime());
+    
+    const getUnbanTimestamp = (user: User): number | null => {
+        if (user.status === 4 && user.bannedAt) { // 24-hour ban
+            return new Date(user.bannedAt).getTime() + (24 * 60 * 60 * 1000);
+        }
+        if (user.status === 5 && user.unbanAt) { // Custom/temp ban
+            return user.unbanAt;
+        }
+        return null;
+    }
+
 
     return (
         <>
@@ -152,35 +163,38 @@ export default function AdminPage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {users.map((user) => (
-                                            <TableRow key={user.username} className="border-white/10">
-                                                <TableCell className="font-medium">
-                                                    {user.username}
-                                                    <p className="text-xs text-white/60">{user.email}</p>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge className={statusMap[user.status]?.color || 'bg-gray-500/20 text-gray-400 border-gray-500/30'}>
-                                                        {statusMap[user.status]?.text || `Unknown (${user.status})`}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>{isValidDate(user.lastLoginAt) ? formatDistanceToNow(new Date(user.lastLoginAt!), { addSuffix: true }) : 'Never'}</TableCell>
-                                                <TableCell>
-                                                    {user.unbanAt ? (
-                                                        <div className="text-xs">
-                                                            <p>{user.banReason}</p>
-                                                            <CountdownTimer unbanAt={user.unbanAt} />
-                                                        </div>
-                                                    ) : (user.status === 3 ? 'Permanent' : 'N/A')}
-                                                </TableCell>
-                                                <TableCell className="text-right space-x-1">
-                                                    <Button variant="ghost" size="icon" onClick={() => handleUpdateStatus(user.username, 3)} title="Permanent Ban"><Shield className="text-red-500"/></Button>
-                                                    <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(user); setIsCustomBanModalOpen(true); }} title="Custom Ban"><ShieldOff className="text-yellow-500"/></Button>
-                                                    <Button variant="ghost" size="icon" onClick={() => handleUpdateStatus(user.username, 9)} title="Deactivate"><UserX className="text-orange-500"/></Button>
-                                                    <Button variant="ghost" size="icon" onClick={() => handleUpdateStatus(user.username, 2)} title="Activate/Unban"><UserCheck className="text-green-500"/></Button>
-                                                    <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(user); setNewStatus(user.status); setIsChangeStatusModalOpen(true); }} title="Edit Status"><Edit className="text-blue-400"/></Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
+                                        {users.map((user) => {
+                                            const unbanTimestamp = getUnbanTimestamp(user);
+                                            return (
+                                                <TableRow key={user.username} className="border-white/10">
+                                                    <TableCell className="font-medium">
+                                                        {user.username}
+                                                        <p className="text-xs text-white/60">{user.email}</p>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge className={statusMap[user.status]?.color || 'bg-gray-500/20 text-gray-400 border-gray-500/30'}>
+                                                            {statusMap[user.status]?.text || `Unknown (${user.status})`}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>{isValidDate(user.lastLoginAt) ? formatDistanceToNow(new Date(user.lastLoginAt!), { addSuffix: true }) : 'Never'}</TableCell>
+                                                    <TableCell>
+                                                        {unbanTimestamp ? (
+                                                            <div className="text-xs">
+                                                                <p>{user.banReason}</p>
+                                                                <CountdownTimer unbanAt={unbanTimestamp} />
+                                                            </div>
+                                                        ) : (user.status === 3 ? 'Permanent' : 'N/A')}
+                                                    </TableCell>
+                                                    <TableCell className="text-right space-x-1">
+                                                        <Button variant="ghost" size="icon" onClick={() => handleUpdateStatus(user.username, 3)} title="Permanent Ban"><Shield className="text-red-500"/></Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(user); setIsCustomBanModalOpen(true); }} title="Custom Ban"><ShieldOff className="text-yellow-500"/></Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => handleUpdateStatus(user.username, 9)} title="Deactivate"><UserX className="text-orange-500"/></Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => handleUpdateStatus(user.username, 2)} title="Activate/Unban"><UserCheck className="text-green-500"/></Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(user); setNewStatus(user.status); setIsChangeStatusModalOpen(true); }} title="Edit Status"><Edit className="text-blue-400"/></Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
                                     </TableBody>
                                 </Table>
                              </div>
@@ -239,3 +253,5 @@ export default function AdminPage() {
         </>
     );
 }
+
+    
