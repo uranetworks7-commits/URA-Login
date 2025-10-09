@@ -23,6 +23,7 @@ import { SettingsPopover } from './settings-popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TermsDialog } from './terms-dialog';
 import { cn } from '@/lib/utils';
+import { AdminAuthDialog } from './admin-auth-dialog';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -86,10 +87,10 @@ const keyframes = `
 
 export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, uiState, setUiState, isLoginBlocked, setIsLoginBlocked, setLoadingTitle: handleSetName, initialLoginUiState, isEmergencyMode, setIsEmergencyMode }: LoginFormProps) {
   const { toast } = useToast();
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCmdOpen, setIsCmdOpen] = useState(false);
   const [isInternetAllowed, setIsInternetAllowed] = useState(true);
+  const [isAdminAuthOpen, setIsAdminAuthOpen] = useState(false);
 
   const [defaultValues, setDefaultValues] = useState({ username: '', email: '', rememberMe: false, autoOpener: false, terms: true });
 
@@ -172,16 +173,6 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
   const handleCustomerCareClick = () => {
     window.open('https://uranetworks7-commits.github.io/URA-CH-Help-line/', '_blank');
   };
-  
-  const handleControlPanelClick = () => {
-    const key = prompt("Enter Admin Key:");
-    if (key === 'Utkarsh225') {
-        router.push('/admin');
-    } else {
-        toast({ variant: 'destructive', title: 'Access Denied' });
-    }
-  };
-
 
   const handleGoogleClick = () => {
     const savedEmail = localStorage.getItem('api');
@@ -235,7 +226,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
                                 Customer Care
                             </Button>
                             <Separator className="bg-white/20" />
-                             <Button variant="link" onClick={handleControlPanelClick} className="text-white hover:text-primary p-4 justify-start">
+                             <Button variant="link" onClick={() => setIsAdminAuthOpen(true)} className="text-white hover:text-primary p-4 justify-start">
                                 <Shield className="mr-2 h-4 w-4" />
                                 Control Panel
                             </Button>
@@ -411,11 +402,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
         setLoadingTitle={handleSetName}
         initialLoginUiState={initialLoginUiState}
      />
+     <AdminAuthDialog open={isAdminAuthOpen} onOpenChange={setIsAdminAuthOpen} />
     </>
   );
 }
-
-    
-
-    
-
