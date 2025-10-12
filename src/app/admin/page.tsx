@@ -144,6 +144,10 @@ export default function AdminPage() {
         return null;
     }
 
+    const handleSiteButtonClick = () => {
+        window.open('https://ura-mannger.netlify.app', '_blank');
+    };
+
 
     return (
         <>
@@ -153,9 +157,14 @@ export default function AdminPage() {
                 <Card className="bg-black/70 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-3xl text-primary font-bold">Admin Control Panel</CardTitle>
-                        <Button variant="outline" size="icon" onClick={fetchUsers} disabled={isLoading} className="bg-transparent hover:bg-white/10">
-                           {isLoading ? <RefreshCw className="animate-spin" /> : <RefreshCw />}
-                        </Button>
+                        <div className="flex items-center gap-2">
+                             <Button variant="outline" onClick={handleSiteButtonClick} className="bg-transparent hover:bg-white/10 text-white">
+                               <ExternalLink className="mr-2 h-4 w-4" /> Site
+                            </Button>
+                            <Button variant="outline" size="icon" onClick={fetchUsers} disabled={isLoading} className="bg-transparent hover:bg-white/10">
+                               {isLoading ? <RefreshCw className="animate-spin" /> : <RefreshCw />}
+                            </Button>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         {isLoading ? (
@@ -231,7 +240,7 @@ export default function AdminPage() {
                 <AlertDialogFooter>
                     <AlertDialogCancel onClick={() => setIsConfirmOpen(false)}>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={() => {
-                        confirmAction?.action();
+                        if (confirmAction) confirmAction.action();
                         setIsConfirmOpen(false);
                     }}>Confirm</AlertDialogAction>
                 </AlertDialogFooter>
@@ -285,3 +294,4 @@ export default function AdminPage() {
     );
 }
 
+    
