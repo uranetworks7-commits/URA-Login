@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { BackgroundImage } from '@/components/auth/background-image';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
+import { DiwaliDecorations } from '@/components/auth/diwali-decorations';
 
 interface User {
     username: string;
@@ -72,7 +73,7 @@ export default function AdminPage() {
     const [confirmAction, setConfirmAction] = useState<{ action: () => void; title: string; description: string } | null>(null);
     const [customBanHours, setCustomBanHours] = useState(1);
     const [customBanReason, setCustomBanReason] = useState('');
-    const [newStatus, setNewStatus] = useState(0);
+    const [newStatus, setNewStatus] = useState<number>(0);
 
     useEffect(() => {
         fetchUsers();
@@ -138,8 +139,11 @@ export default function AdminPage() {
         if (user.status === 4 && user.bannedAt) { // 24-hour ban
             return new Date(user.bannedAt).getTime() + (24 * 60 * 60 * 1000);
         }
-        if (user.status === 5 && user.unbanAt) { // Custom/temp ban
+        if (user.status === 5 && user.unbanAt) { // Custom/temp ban with unbanAt field
             return user.unbanAt;
+        }
+         if (user.status === 5 && user.bannedAt && !user.unbanAt) { // 7-day default temp ban
+            return new Date(user.bannedAt).getTime() + (7* 24 * 60 * 60 * 1000);
         }
         return null;
     }
@@ -151,8 +155,9 @@ export default function AdminPage() {
 
     return (
         <>
-        <main className="relative min-h-screen p-4 sm:p-6 md:p-8">
+        <main className="relative min-h-screen p-4 sm:p-6 md:p-8 overflow-hidden">
             <BackgroundImage />
+            <DiwaliDecorations />
             <div className="relative z-10">
                 <Card className="bg-black/70 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -293,5 +298,3 @@ export default function AdminPage() {
         </>
     );
 }
-
-    

@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { BackgroundImage } from '@/components/auth/background-image';
 import { Separator } from '@/components/ui/separator';
+import { DiwaliDecorations } from '@/components/auth/diwali-decorations';
 
 const uraSignupSchema = z.object({
   moderatorId: z.string().min(1, 'Moderator ID is required'),
@@ -60,8 +61,9 @@ export default function UraSignupPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center p-4">
+    <main className="relative flex min-h-screen flex-col items-center justify-center p-4 overflow-hidden">
       <BackgroundImage />
+      <DiwaliDecorations />
       <div className="relative z-10 w-full flex items-center justify-center">
         <Card className="w-full max-w-lg bg-black/50 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
           <Form {...form}>

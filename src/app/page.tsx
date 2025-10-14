@@ -20,6 +20,7 @@ import { EmergencyBanner } from '@/components/auth/emergency-banner';
 import { AiLoaderScreen } from '@/components/auth/ai-loader-screen';
 import { DeactivatedScreen } from '@/components/auth/deactivated-screen';
 import { LoginQueueScreen } from '@/components/auth/login-queue-screen';
+import { DiwaliDecorations } from '@/components/auth/diwali-decorations';
 
 type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError' | 'crashed' | 'deactivated' | 'inQueue';
 type AuthMode = 'login' | 'signup';
@@ -329,8 +330,9 @@ export default function Home() {
 
 
   return (
-    <main className={cn("relative flex min-h-screen flex-col items-center justify-center", { 'hack-effect': isHackEffectActive })}>
+    <main className={cn("relative flex min-h-screen flex-col items-center justify-center overflow-hidden", { 'hack-effect': isHackEffectActive })}>
       <BackgroundImage />
+      <DiwaliDecorations />
        {isClient && isEmergencyMode && (
           <EmergencyBanner 
             onTurnOff={() => {
@@ -345,5 +347,3 @@ export default function Home() {
     </main>
   );
 }
-
-    

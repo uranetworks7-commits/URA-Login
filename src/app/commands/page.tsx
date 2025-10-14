@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { BackgroundImage } from '@/components/auth/background-image';
 import { useRouter } from 'next/navigation';
 import { availableCommands } from '@/components/auth/command-list';
+import { DiwaliDecorations } from '@/components/auth/diwali-decorations';
 
 const ITEMS_PER_PAGE = 6;
 const COMMAND_PREFIX = 'URA//:CMD/';
@@ -41,8 +42,9 @@ export default function CommandsPage() {
 
 
     return (
-        <main className="relative flex min-h-screen flex-col items-center justify-center p-4">
+        <main className="relative flex min-h-screen flex-col items-center justify-center p-4 overflow-hidden">
             <BackgroundImage />
+            <DiwaliDecorations />
             <div className="relative z-10 w-full flex items-center justify-center">
                 <Card className="w-full max-w-2xl bg-black/70 text-white border-white/20 backdrop-blur-lg shadow-2xl shadow-black/50">
                     <CardHeader className="text-center relative">
