@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { type LoginResult, type UserData, type BannedDetails, loginUser, finalizeQueuedLogin } from '@/app/actions';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/auth/loading-screen';
 import { LoginForm } from '@/components/auth/login-form';
 import { SignupForm } from '@/components/auth/signup-form';
@@ -21,8 +21,9 @@ import { AiLoaderScreen } from '@/components/auth/ai-loader-screen';
 import { DeactivatedScreen } from '@/components/auth/deactivated-screen';
 import { LoginQueueScreen } from '@/components/auth/login-queue-screen';
 import { DiwaliDecorations } from '@/components/auth/diwali-decorations';
+import { Bird, Download } from 'lucide-react';
 
-type AppState = 'permission' | 'loading' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError' | 'crashed' | 'deactivated' | 'inQueue';
+type AppState = 'permission' | 'loading' | 'appExpired' | 'auth' | 'quickLogin' | 'loggedIn' | 'banned' | 'serverError' | 'crashed' | 'deactivated' | 'inQueue';
 type AuthMode = 'login' | 'signup';
 
 export interface LoginUIState {
@@ -34,6 +35,35 @@ export interface LoginUIState {
   glowColor?: string;
   shake: boolean;
 }
+
+const AppExpiredScreen: FC = () => {
+    const handleUpdateClick = () => {
+        window.open('https://uranetworks7-commits.github.io/www.ura-networks.downloader.app/', '_blank');
+    };
+
+    return (
+        <div className="flex items-center justify-center min-h-screen p-4">
+            <Card className="w-full max-w-lg bg-black/80 text-white border-yellow-500/50 backdrop-blur-lg shadow-2xl shadow-yellow-500/20">
+                <CardHeader className="text-center items-center">
+                    <Bird className="h-12 w-12 text-yellow-400 mb-4" />
+                    <CardTitle className="text-3xl text-yellow-400 font-bold">App Expired</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center gap-6 text-center">
+                    <p className="text-white/90">
+                        VLF-Tec & PR Team Introduced A New Freemium System and This System Is Strictly Followed By All URA-Servers Order By PR-Team.
+                    </p>
+                    <p className="font-semibold text-white">
+                        Please Update Your App.
+                    </p>
+                    <Button onClick={handleUpdateClick} className="w-full font-semibold" size="lg">
+                        <Download className="mr-2 h-5 w-5" />
+                        Update App
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
+    );
+};
 
 const LoggedInScreen: FC<{ user: UserData; onLogout: () => void }> = ({ user, onLogout }) => {
   const [message, setMessage] = useState('Login successful. Preparing your dashboard...');
@@ -176,18 +206,7 @@ export default function Home() {
   }
 
   const handleLoadingComplete = () => {
-    const rememberMe = localStorage.getItem('rememberMe') === 'true';
-    const savedUsername = localStorage.getItem('username');
-    const savedEmail = localStorage.getItem('api');
-    const autoOpener = localStorage.getItem('autoOpener') === 'true';
-    
-    if(rememberMe && savedUsername && savedEmail) {
-        setQuickLoginUser({username: savedUsername, email: savedEmail});
-        setAutoOpen(autoOpener);
-        setAppState('quickLogin');
-    } else {
-        setAppState('auth');
-    }
+    setAppState('appExpired');
   };
 
   const handleLoginResult = (result: LoginResult) => {
@@ -266,6 +285,8 @@ export default function Home() {
         return <PermissionNotice onAgree={handlePermissionAgree} />;
       case 'loading':
         return <LoadingScreen onComplete={handleLoadingComplete} title={loadingTitle} isEmergency={isEmergencyMode} />;
+      case 'appExpired':
+        return <AppExpiredScreen />;
       case 'quickLogin':
         return quickLoginUser && <QuickLoginForm user={quickLoginUser} onLoginResult={handleLoginResult} onExit={handleExitQuickLogin} autoOpen={autoOpen} isEmergency={isEmergencyMode} />;
       case 'auth':
