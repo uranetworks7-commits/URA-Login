@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, LogIn, Github, MoreVertical, Zap, BatteryCharging, Sparkles, Terminal, Settings, Mail, LifeBuoy, Shield } from 'lucide-react';
+import { Loader2, LogIn, Github, MoreVertical, Zap, BatteryCharging, Sparkles, Terminal, Settings, Mail, LifeBuoy, Shield, Info } from 'lucide-react';
 import { loginUser, type LoginResult } from '@/app/actions';
 import type { LoginUIState } from '@/app/page';
 
@@ -24,6 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { TermsDialog } from './terms-dialog';
 import { cn } from '@/lib/utils';
 import { AdminAuthDialog } from './admin-auth-dialog';
+import { AppCreditsDialog } from './app-credits-dialog';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -92,6 +93,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
   const [isCmdOpen, setIsCmdOpen] = useState(false);
   const [isInternetAllowed, setIsInternetAllowed] = useState(true);
   const [isAdminAuthOpen, setIsAdminAuthOpen] = useState(false);
+  const [isCreditsOpen, setIsCreditsOpen] = useState(false);
 
   const [defaultValues, setDefaultValues] = useState({ username: '', email: '', rememberMe: false, autoOpener: false, terms: true });
 
@@ -375,7 +377,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
             </div>
 
           </CardContent>
-          <CardFooter className="flex flex-col gap-4 pt-2">
+          <CardFooter className="flex-col gap-4 pt-2">
             <Button type="submit" className="w-full font-semibold" size="lg" disabled={isSubmitting}>
               {isSubmitting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -385,9 +387,14 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
               {uiState.buttonText}
             </Button>
             <Separator className={cn("my-2", uiState.theme === 'dark' ? 'bg-white/20' : 'bg-black/20')} />
-            <Button variant="link" type="button" onClick={onSignupClick} className={cn("hover:text-white", uiState.theme === 'dark' ? 'text-white/80' : 'text-black/80')}>
-              Don't have an account? Sign Up
-            </Button>
+            <div className="flex w-full justify-between">
+                <Button variant="link" type="button" onClick={onSignupClick} className={cn("hover:text-white", uiState.theme === 'dark' ? 'text-white/80' : 'text-black/80')}>
+                  Don't have an account? Sign Up
+                </Button>
+                 <Button variant="link" type="button" onClick={() => setIsCreditsOpen(true)} className={cn("hover:text-white", uiState.theme === 'dark' ? 'text-white/80' : 'text-black/80')}>
+                  <Info className="mr-2 h-4 w-4"/> App Credits
+                </Button>
+            </div>
           </CardFooter>
         </form>
       </Form>
@@ -404,6 +411,7 @@ export function LoginForm({ onSignupClick, onLoginResult, onHackEffectToggle, ui
         initialLoginUiState={initialLoginUiState}
      />
      <AdminAuthDialog open={isAdminAuthOpen} onOpenChange={setIsAdminAuthOpen} />
+     <AppCreditsDialog open={isCreditsOpen} onOpenChange={setIsCreditsOpen} />
     </>
   );
 }
